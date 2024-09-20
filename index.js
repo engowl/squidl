@@ -29,7 +29,7 @@ fastify.register(fastifyMultipart, {
 
 fastify.get("/", async (request, reply) => {
   return reply.status(200).send({
-    message: "Hi, I'm PROPEX API!",
+    message: "Hi, I'm SQUIDL.me API!",
     error: null,
     data: null,
   });
