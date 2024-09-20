@@ -42,6 +42,17 @@ export const stealthAddressRoutes = (app, _, done) => {
     return "0xabc"; // Example stealth address
   });
 
+  app.get('/aliases/resolve/:sender/:data.json', async (request, reply) => {
+    const { sender, data } = request.params;
+    console.log({
+      sender,
+      data
+    })
+
+    // Handle your logic here
+    reply.send({ message: `Resolved sender: ${sender}, data: ${data}` });
+  });
+
   // POST /tx/withdraw, to generate the transactions for the withdrawal of the funds
   app.post('/tx/withdraw', {
     preHandler: [authMiddleware]
