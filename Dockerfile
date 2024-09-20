@@ -15,7 +15,7 @@ RUN mkdir -p /usr/src/app/temp \
     && chown -R node /usr/src/app \
     && chown -R node /usr
 
-EXPOSE 3205
+EXPOSE 3400
 
 USER node
 
