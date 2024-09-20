@@ -38,11 +38,11 @@ fastify.get("/", async (request, reply) => {
 /* --------------------------------- Routes --------------------------------- */
 fastify.register(authRoutes, {
   prefix: "/auth",
-})
+});
 
 fastify.register(stealthAddressRoutes, {
   prefix: "/stealth-address",
-})
+});
 
 /* --------------------------------- Workers -------------------------------- */
 

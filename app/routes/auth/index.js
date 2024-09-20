@@ -1,4 +1,10 @@
-import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
+import { prismaClient } from "../../lib/db/prisma.js";
+import { verifyDynamicToken } from "../../lib/dynamic/auth.js";
+import {
+  authMiddleware,
+  getUserJwtData,
+} from "../../lib/middlewares/authMiddleware.js";
+import { verifyFields } from "../../utils/request.js";
 
 /**
  *
@@ -7,37 +13,97 @@ import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
  * @param {Function} done
  */
 export const authRoutes = (app, _, done) => {
-  app.post('/login', async (req, res) => {
-    // TODO: implement the SIWE login method here
-    try {
-      // TODO: Check the current user,, is it saved on User or not
-      // If not, create new UserAlias with blank alias for it, and save it to the database. This alias will be for root/main alias
+  app.post("/login", async (req, res) => {
+    await verifyFields(req.body, ["username", "address"], res);
 
-      return "Login succeed"
-      // eslint-disable-next-line no-unreachable
+    const { address, username } = req.body;
+
+    try {
+      const existingUser = await prismaClient.user.findFirst({
+        where: {
+          address,
+          username,
+        },
+      });
+
+      console.log({ existingUser });
+      if (!existingUser) {
+        const createdUser = await prismaClient.$transaction(async (prisma) => {
+          const createdUser = await prisma.user.create({
+            data: {
+              address,
+              username: "",
+            },
+          });
+          await prisma.userAlias.create({
+            data: {
+              user: {
+                connect: {
+                  id: createdUser.id,
+                },
+              },
+              alias: "",
+            },
+          });
+          return createdUser;
+        });
+        return createdUser;
+      }
+      return existingUser;
     } catch (error) {
+      console.log("error while login", error);
       return {
-        error: 'error',
+        error: "error",
         data: null,
-        message: 'error'
+        message: "error",
+      };
+    }
+  });
+
+  app.get(
+    "/me",
+    {
+      preHandler: [authMiddleware],
+    },
+    async (req, reply) => {
+      const user = getUserJwtData(req.user);
+
+      try {
+        const userData = await prismaClient.user.findFirst({
+          where: {
+            address: user.address,
+          },
+        });
+        console.log({ userData });
+        return userData;
+      } catch (error) {
+        return {
+          error: "error",
+          data: null,
+          message: "error",
+        };
       }
     }
-  })
+  );
 
-  app.get('/me', {
-    preHandler: [authMiddleware]
-  }, async (req, res) => {
+  app.post("/session", async (req, reply) => {
+    const { authToken } = req.body;
+
+    await verifyFields(req.body, ["authToken"], reply);
     try {
-      return "User's Data"
-      // eslint-disable-next-line no-unreachable
-    } catch (error) {
+      const decodedToken = await verifyDynamicToken(authToken);
       return {
-        error: 'error',
-        data: null,
-        message: 'error'
-      }
+        decodedToken,
+      };
+    } catch (e) {
+      console.log("Error while getting session token");
+      return reply
+        .send({
+          message: "Error while getting session token",
+        })
+        .status(500);
     }
-  })
+  });
 
   done();
-}
+};
