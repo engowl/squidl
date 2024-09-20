@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import fastifyMultipart from "@fastify/multipart";
 import { authRoutes } from "./app/routes/auth/index.js";
 import { stealthAddressRoutes } from "./app/routes/stealth-address/index.js";
+import { priceWorker } from "./app/workers/priceWorkers.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,6 +46,7 @@ fastify.register(stealthAddressRoutes, {
 })
 
 /* --------------------------------- Workers -------------------------------- */
+fastify.register(priceWorker)
 
 const start = async () => {
   try {
