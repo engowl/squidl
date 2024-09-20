@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Athletics";
+  src: url("/assets/font/AthleticsBold.woff") format("woff");
+  font-weight: 700; /* Adjust based on the weight */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Athletics";
+  src: url("/assets/font/AthleticsExtraBold.woff") format("woff");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Athletics";
+  src: url("/assets/font/AthleticsLight.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Athletics";
+  src: url("/assets/font/AthleticsMedium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Athletics";
+  src: url("/assets/font/AthleticsRegular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@layer base {
+  body {
+    @apply font-athletics;
+  }
+}
