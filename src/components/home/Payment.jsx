@@ -35,7 +35,7 @@ export default function Payment() {
   return (
     <div
       className={
-        "flex flex-col w-full h-full items-center justify-center gap-5"
+        "flex flex-col w-full max-w-md h-full items-center justify-center gap-5"
       }
     >
       <div className="w-36">
@@ -60,7 +60,7 @@ export default function Payment() {
         </div>
 
         <div className="bg-[#563EEA] rounded-[50px] mt-7 p-5 flex flex-col items-center justify-center gap-4 w-full">
-          <div className="w-full max-w-72 bg-white p-6 rounded-[32px]">
+          <div className="w-full bg-white p-6 rounded-[32px]">
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png"
               alt="qr"

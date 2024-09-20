@@ -4,6 +4,7 @@ import AuthLayout from "./layouts/AuthLayout.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import PlainLayout from "./layouts/PlainLayout.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
+import { AliasDetailPage } from "./pages/AliasDetailPage.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -14,6 +15,10 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <IndexPage />,
+      },
+      {
+        path: "/:alias/detail",
+        element: <AliasDetailPage />,
       },
     ],
   },
