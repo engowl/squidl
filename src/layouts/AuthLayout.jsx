@@ -4,6 +4,7 @@ import {
   DynamicEmbeddedWidget,
   useIsLoggedIn,
 } from "@dynamic-labs/sdk-react-core";
+import AuthProvider from "../providers/AuthProvider";
 
 export default function AuthLayout() {
   const isLoggedIn = useIsLoggedIn();
@@ -19,9 +20,9 @@ export default function AuthLayout() {
   }
 
   return (
-    <div>
+    <AuthProvider>
       <Navbar />
       <Outlet />
-    </div>
+    </AuthProvider>
   );
 }
