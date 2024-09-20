@@ -1,0 +1,49 @@
+{
+  "name": "squidl-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "prestart": "prisma generate",
+    "dev": "nodemon index.js",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:generate-seed": "npx @snaplet/seed sync",
+    "db:seed": "npx tsx prisma/seed/seed.ts",
+    "db:reset": "prisma migrate reset --force && prisma db push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/multipart": "^9.0.0",
+    "@prisma/client": "^5.19.1",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "fastify": "^5.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nanoid": "^5.0.7",
+    "node-cron": "^3.0.3",
+    "rate-limiter-flexible": "^5.0.3",
+    "siwe": "^2.3.2",
+    "slugify": "^1.6.6",
+    "thirdweb": "^5.57.3",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "@types/validator": "^13.12.1",
+    "eslint": "^8.57.0",
+    "nodemon": "^3.1.4",
+    "prisma": "^5.19.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}
