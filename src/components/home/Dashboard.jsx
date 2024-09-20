@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { squidlAPI } from "../../api/squidl";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
-import { u } from "framer-motion/client";
 
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();

@@ -28,6 +28,9 @@ export default {
           950: "#200b6a",
         },
       },
+      borderRadius: {
+        "4xl": "32px",
+      },
     },
   },
   plugins: [nextui()],

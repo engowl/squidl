@@ -7,7 +7,8 @@ import {
 import AuthProvider from "../providers/AuthProvider";
 
 export default function AuthLayout() {
-  const isLoggedIn = useIsLoggedIn();
+  // const isLoggedIn = useIsLoggedIn();
+  const isLoggedIn = true;
 
   if (!isLoggedIn) {
     return (
