@@ -5,6 +5,7 @@ import {
   useIsLoggedIn,
 } from "@dynamic-labs/sdk-react-core";
 import AuthProvider from "../providers/AuthProvider";
+import { Toaster } from "react-hot-toast";
 
 export default function AuthLayout() {
   // const isLoggedIn = useIsLoggedIn();
@@ -22,6 +23,7 @@ export default function AuthLayout() {
 
   return (
     <AuthProvider>
+      <Toaster />
       <Navbar />
       <Outlet />
     </AuthProvider>
