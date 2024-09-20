@@ -90,6 +90,39 @@ model Token {
   @@unique([chainId, address])
 }
 
+model CommonTokenPrice {
+  id      String @id
+  chainId Int
+
+  name   String
+  symbol String
+
+  tokenAddress String?
+  priceUsd     Float
+
+  isNativeToken Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OneInchTokenList {
+  id String @id @default(cuid())
+
+  address  String
+  chainId  Int
+
+  name     String
+  symbol   String
+  decimals Int
+  logoURI  String?
+
+  @@unique([chainId, address])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Transaction {
   id String @id @default(cuid())
 
