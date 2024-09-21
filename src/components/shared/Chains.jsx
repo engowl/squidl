@@ -32,6 +32,13 @@ export default function Chains() {
             className="object-cover w-full h-full"
           />
         </div>
+        <div className="size-6 rounded-full bg-[#A1A1A3]">
+          <img
+            src="/assets/morph-logo.png"
+            alt="ch"
+            className="object-cover w-full h-full"
+          />
+        </div>
       </div>
     </div>
   );
