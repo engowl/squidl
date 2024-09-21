@@ -1,15 +1,25 @@
-import { Button } from "@nextui-org/react";
+import { Button, Skeleton } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import TxItem from "./TxItem.jsx";
 import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
-import { useLoaderData, useNavigate, useParams } from "react-router-dom";
+import {
+  useLoaderData,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { isBackAtom } from "../../store/payment-card-store.js";
 import { useUserWallets } from "@dynamic-labs/sdk-react-core";
 import Nounsies from "../shared/Nounsies.jsx";
+import useSWR from "swr";
+import {
+  AVAILABLE_CARDS_BG,
+  CARDS_SCHEME,
+} from "../home/dashboard/PaymentLinksDashboard.jsx";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -17,6 +27,8 @@ export default function AliasDetail() {
   const userWallets = useUserWallets();
   const fullAlias = useLoaderData();
   const { alias, parent } = useParams();
+  const [searchParams] = useSearchParams();
+  const scheme = searchParams.get("scheme");
 
   console.log(fullAlias);
 
@@ -32,8 +44,13 @@ export default function AliasDetail() {
   };
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Reset scroll to top
+    window.scrollTo(0, 0);
   }, []);
+
+  const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
 
   const {
     data: aliasAddress,
@@ -112,7 +129,7 @@ export default function AliasDetail() {
         className="relative w-full h-full"
       >
         <img
-          src="/assets/card.png"
+          src={AVAILABLE_CARDS_BG[CARDS_SCHEME[scheme]]}
           alt="card-placeholder"
           className="absolute w-full h-full object-cover rounded-2xl"
         />

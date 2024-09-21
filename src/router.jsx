@@ -8,6 +8,8 @@ import { AliasDetailPage } from "./pages/AliasDetailPage.jsx";
 import TransferPage from "./pages/TransferPage.jsx";
 import PaymentLinksPage from "./pages/PaymentLinksPage.jsx";
 import TransactionsPage from "./pages/TransactionsPage.jsx";
+import MainBalancePage from "./pages/MainBalancePage.jsx";
+import PrivateBalancePage from "./pages/PrivateBalancePage.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +45,14 @@ export const router = createBrowserRouter([
       {
         path: "/transactions",
         element: <TransactionsPage />,
+      },
+      {
+        path: "/main-balance",
+        element: <MainBalancePage />,
+      },
+      {
+        path: "/private-balance",
+        element: <PrivateBalancePage />,
       },
     ],
   },

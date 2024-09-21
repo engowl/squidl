@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { squidlAPI } from "../../api/squidl.js";
+import { useUserWallets } from "@dynamic-labs/sdk-react-core";
 
 const confettiConfig = {
   angle: 90, // Angle at which the confetti will explode
@@ -57,7 +58,12 @@ export default function CreateLinkDialog() {
         {step === "one" ? (
           <StepOne setStep={setStep} isLoading={isLoading} user={user} />
         ) : (
-          <StepTwo isLoading={isLoading} user={user} setOpen={setOpen} />
+          <StepTwo
+            isLoading={isLoading}
+            user={user}
+            setOpen={setOpen}
+            setStep={setStep}
+          />
         )}
       </ModalContent>
     </Modal>
@@ -142,9 +148,10 @@ function StepOne({ setStep, isLoading, user }) {
   );
 }
 
-function StepTwo({ user, isLoading, setOpen }) {
+function StepTwo({ user, isLoading, setOpen, setStep }) {
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const navigate = useNavigate();
+  const userWallets = useUserWallets();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -170,24 +177,27 @@ function StepTwo({ user, isLoading, setOpen }) {
         />
 
         <div className="absolute right-5 top-5 size-12 rounded-full overflow-hidden">
-          <Nounsies address={"maisontatsuya.jane.squidl.me"} />
+          <Nounsies address={userWallets[0]?.address} />
         </div>
 
         <div className="relative w-full h-52 md:h-60 flex flex-col items-center justify-start py-7 px-6">
-          <div className="flex flex-row gap-2 items-center mr-auto">
-            <h1 className="text-white font-bold">
-              {isLoading ? (
-                <Skeleton className="w-25 h-6" />
-              ) : (
-                <p className="absolute right-4 text-neutral-400">
-                  {""}.{user.username}.squidl.me
-                </p>
-              )}
-            </h1>
-
-            <button onClick={() => onCopy("link")}>
-              <Icons.copy className="text-[#848484] size-4" />
-            </button>
+          <div className="w-full flex items-center justify-between">
+            <div className="flex gap-2 items-center">
+              <h1 className="text-white font-medium">
+                {isLoading ? (
+                  <Skeleton className="w-25 h-6" />
+                ) : (
+                  <p className="text-neutral-200">
+                    freelance.{user.username}.squidl.me
+                  </p>
+                )}
+              </h1>
+              <button
+                onClick={() => onCopy(`freelance.${user.username}.squidl.me`)}
+              >
+                <Icons.copy className="text-[#848484] size-4" />
+              </button>
+            </div>
           </div>
 
           <h1 className="absolute top-1/2 -translate-y-1/2 text-white font-extrabold text-2xl">
@@ -214,6 +224,7 @@ function StepTwo({ user, isLoading, setOpen }) {
       <Button
         onClick={() => {
           setOpen(false);
+          setStep("one");
           navigate("/");
         }}
         className="h-16 rounded-full bg-transparent flex items-center justify-center w-full mt-1 text-purply-600"

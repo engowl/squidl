@@ -16,6 +16,23 @@ import useSWR from "swr";
 import { shortenAddress } from "../../../utils/string.js";
 import toast from "react-hot-toast";
 import { Icons } from "../../shared/Icons.jsx";
+import crypto from "crypto";
+import { sleep } from "../../../utils/process.js";
+import { useNavigate } from "react-router-dom";
+
+function generateRandomEthAddress() {
+  // Generate a random 20-byte hexadecimal string (Ethereum address length is 40 hex characters or 20 bytes)
+  const randomBytes = new Uint8Array(20);
+  window.crypto.getRandomValues(randomBytes);
+
+  // Convert the bytes to a hexadecimal string
+  const randomHex = Array.from(randomBytes, (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+
+  // Return the Ethereum address with '0x' prefix
+  return "0x" + randomHex;
+}
 
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();
@@ -76,9 +93,22 @@ export default function Dashboard() {
 }
 
 function ReceiveCard({ setOpenQr, user, isLoading }) {
+  const [randomAddress, setRandomAddress] = useState(
+    generateRandomEthAddress()
+  );
+
+  const [loadingAlias, setLoading] = useState(false);
+
+  async function generateAddress() {
+    setLoading(true);
+    await sleep(1000);
+    setRandomAddress(generateRandomEthAddress());
+    setLoading(false);
+  }
+
   const {
     data: aliasAddress,
-    isLoading: loadingAlias,
+    // isLoading: loadingAlias,
     mutate,
     isValidating,
   } = useSWR(
@@ -108,10 +138,10 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
     <div className="bg-purply p-4 rounded-3xl text-white w-full">
       <div className="w-full flex items-center justify-between">
         <p className="text-xl">Receive</p>
-        <div className="bg-purply-800 rounded-full p-1 flex relative items-center font-medium">
+        <div className="bg-purply-800 rounded-full flex relative items-center font-medium">
           <div
             className={cnm(
-              "w-24 bg-purply-600 h-[calc(100%-8px)] absolute left-1 rounded-full transition-transform ease-in-out",
+              "w-24 h-10 bg-purply-600 h-full absolute left-0 rounded-full transition-transform ease-in-out",
               mode === "ens" ? "translate-x-0" : "translate-x-full"
             )}
           ></div>
@@ -120,7 +150,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
               setMode("ens");
             }}
             className={cnm(
-              "w-24 h-8 rounded-full flex items-center justify-center relative transition-colors",
+              "w-24 h-10 rounded-full flex items-center justify-center relative transition-colors",
               mode === "ens" ? "text-white" : "text-purply-500"
             )}
           >
@@ -148,7 +178,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
               loadingAlias || isValidating ? (
                 <Skeleton className="flex rounded-full w-20 h-8" />
               ) : (
-                <p>{shortenAddress(aliasAddress)}</p>
+                <p>{shortenAddress(randomAddress)}</p>
               )
             ) : (
               <p>{user.username}.squidl.me</p>
@@ -158,7 +188,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
         <div className="flex items-center gap-2">
           {mode === "address" ? (
             <button
-              onClick={() => mutate()}
+              onClick={() => generateAddress()}
               className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
             >
               <Icons.refresh className="text-[#563EEA] size-5" />
@@ -209,7 +239,7 @@ function TotalBalance() {
                 setMode("available");
               }}
               className={cnm(
-                "w-24 h-9 rounded-full flex items-center justify-center relative transition-colors",
+                "w-24 h-10 rounded-full flex items-center justify-center relative transition-colors",
                 mode === "ens" ? "text-black" : "text-neutral-500"
               )}
             >
@@ -251,6 +281,17 @@ function TotalBalance() {
 }
 
 function BalanceMode({ mode }) {
+  const navigate = useNavigate();
+
+  function onNavigate() {
+    if (mode === "available") {
+      navigate("/main-balance");
+    }
+    if (mode === "private") {
+      navigate("/private-balance");
+    }
+  }
+
   return (
     <>
       <div className="w-full relative h-80">
@@ -298,6 +339,7 @@ function BalanceMode({ mode }) {
       </div>
       <div className="mt-4 w-full flex items-center gap-2 px-6 py-6 text-lg">
         <Button
+          onClick={onNavigate}
           className={cnm(
             " flex-1 rounded-full h-14",
             mode === "available"
@@ -308,6 +350,9 @@ function BalanceMode({ mode }) {
           Details
         </Button>
         <Button
+          onClick={() => {
+            navigate("/james.squidl.me/transfer");
+          }}
           className={cnm(
             " flex-1 rounded-full h-14",
             mode === "available"
