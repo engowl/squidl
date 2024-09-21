@@ -27,7 +27,7 @@ export const OASIS_CONTRACT = {
 
 export const stealthSignerGenerateStealthAddress = async ({
   chainId,
-  userId
+  key,
 }) => {
   const network = Object.values(OASIS_CONTRACT).find(
     (network) => network.network.id === chainId
@@ -42,7 +42,7 @@ export const stealthSignerGenerateStealthAddress = async ({
     provider
   );
 
-  const generatedStealthAddress = await contract.generateStealthAddress.staticCall(2);
+  const generatedStealthAddress = await contract.generateStealthAddress.staticCall(key);
   const [stealthAddress, ephemeralPub, viewHint] = generatedStealthAddress;
 
   const data = {

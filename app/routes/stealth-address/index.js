@@ -1,10 +1,12 @@
 import { ethers } from "ethers";
-import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
+import { authMiddleware, getUserJwtData } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
-import { dnsDecodeName, handleQuery, resolverAbi, schema } from "../../utils/ensUtils.js";
+import { dnsDecodeName, resolverAbi } from "../../utils/ensUtils.js";
 import { concat, decodeFunctionData, encodeAbiParameters, encodeFunctionResult, encodePacked, isAddress, isHex, keccak256, recoverAddress, toHex } from "viem";
-import { privateKeyToAccount, sign } from "viem/accounts";
-import { ZERO_ADDRESS } from "thirdweb";
+import { sign } from "viem/accounts";
+import { getNextAliasKey } from "./helpers/aliasHelpers.js";
+import { prismaClient } from "../../lib/db/prisma.js";
+import { OASIS_CONTRACT, stealthSignerGenerateStealthAddress } from "../../lib/contracts/oasis/oasisContract.js";
 
 /**
  *
@@ -42,11 +44,11 @@ export const stealthAddressRoutes = (app, _, done) => {
       return chartData;
     } catch (error) {
       console.error(error)
-      return {
+      return res.status(500).send({
         error: error.message,
         data: null,
         message: "error while fetching chart data"
-      }
+      })
     }
   })
 
@@ -54,22 +56,118 @@ export const stealthAddressRoutes = (app, _, done) => {
   app.post('/aliases/new-alias', {
     preHandler: [authMiddleware]
   }, async (req, res) => {
-    const { body } = req;
-    // Create new alias logic
-    return { success: true, aliasId: "new-alias-id" };
+    try {
+      const { address } = getUserJwtData(req.user);
+      const { alias } = req.body;
+
+      const user = await prismaClient.user.findFirst({
+        where: {
+          address: address
+        },
+        select: {
+          id: true,
+        }
+      })
+
+      if (!user) {
+        return res.status(400).send({ message: "User not found" });
+      }
+
+      // Const check if alias already exists
+      const existingUserAlias = await prismaClient.userAlias.findMany({
+        where: {
+          alias: alias,
+          user: {
+            address: address
+          }
+        }
+      })
+
+      if (existingUserAlias.length > 0) {
+        return res.status(400).send({ message: "Alias already exists" });
+      }
+
+      // Validate it's alphanumeric, no special characters, no spaces, 15 characters max, 1 character min
+      if (!/^[a-zA-Z0-9]{1,15}$/.test(alias)) {
+        return res.status(400).send({ message: "Invalid alias. It should be alphanumeric, no special characters, no spaces, 15 characters max, 1 character min" });
+      }
+
+      // Create new alias logic here
+      const nextAliasKey = await getNextAliasKey();
+
+      const newAlias = await prismaClient.userAlias.create({
+        data: {
+          user: {
+            connect: {
+              id: user.id
+            }
+          },
+          key: nextAliasKey,
+          alias: alias
+        }
+      })
+
+      return newAlias;
+    } catch (error) {
+      console.error('Error while creating new alias:', error)
+      return res.status(500).send({
+        message: "Error while creating new alias"
+      });
+    }
   });
+
+  app.get('/address/new-address', async (req, res) => {
+    try {
+      // Detect the full alias, e.g. user.user.squidl.eth, or user.squidl.eth ( [alias].[username].squidl.eth )
+      const { fullAlias, isTestnet = false } = req.query;
+
+      // Split the full alias to get the alias
+      const aliasParts = fullAlias.split('.');
+      const alias = aliasParts[aliasParts.length - 4];
+      const username = aliasParts[aliasParts.length - 3];
+
+      console.log({
+        alias: alias,
+        username: username
+      })
+
+      const userAlias = await prismaClient.userAlias.findFirst({
+        where: {
+          alias: alias || null,
+          user: {
+            username: username
+          }
+        }
+      })
+
+      if (!userAlias) {
+        return res.status(400).send({ message: "Alias not found" });
+      }
+
+      // Generate or fetch new stealth address logic for aliasId
+      const newStealthAddress = await stealthSignerGenerateStealthAddress({
+        chainId: isTestnet ? 23295 : 23295,
+        key: userAlias.key
+      })
+
+      return newStealthAddress;
+    } catch (error) {
+      console.error(error)
+    }
+  })
 
   // GET /address/:alias-id/new-address, to get new stealth address of a certain alias. This endpoint is important, and it will be used for ENS CCIP read too
-  app.get('/address/new-address', async (req, res) => {
-    const { alias } = req.params;
-    // Generate or fetch new stealth address logic for aliasId
-    // TODO: generate a stealth address, then save it to the database
+  // app.get('/address/new-address', async (req, res) => {
+  //   const { alias } = req.params;
+  //   // Generate or fetch new stealth address logic for aliasId
+  //   // TODO: generate a stealth address, then save it to the database
 
-    // Random address
-    const wallet = ethers.Wallet.createRandom();
 
-    return { address: wallet.address };
-  });
+  //   // Random address
+  //   const wallet = ethers.Wallet.createRandom();
+
+  //   return { address: wallet.address };
+  // });
 
   // app.get('/aliases/resolve/:sender/:data.json', async (request, reply) => {
   //   const { sender, data } = request.params;
@@ -82,6 +180,25 @@ export const stealthAddressRoutes = (app, _, done) => {
   //   reply.send({ message: `Resolved sender: ${sender}, data: ${data}` });
   // });
 
+  // POST /tx/withdraw, to generate the transactions for the withdrawal of the funds
+  app.post('/tx/withdraw', {
+    preHandler: [authMiddleware]
+  }, async (req, res) => {
+    const { body } = req;
+    // Transaction withdrawal logic here
+    return { success: true };
+  });
+
+  // POST /tx/private-withdraw, to generate the transactions for the withdrawal of the funds, privately (using Oasis protocol)
+  app.post('/tx/private-withdraw', {
+    preHandler: [authMiddleware]
+  }, async (req, res) => {
+    const { body } = req;
+    // Private withdrawal logic using Oasis protocol
+    return { success: true };
+  });
+
+  // ENS RESOLVERS!
   app.get('/aliases/resolve/*', async (request, reply) => {
     try {
       // const { sender, data } = request.params;
@@ -138,7 +255,7 @@ export const stealthAddressRoutes = (app, _, done) => {
       )
       console.log('abiItem:', abiItem)
 
-      if(!abiItem) {
+      if (!abiItem) {
         throw new Error(`Unsupported query function ${functionName}`);
       }
 
@@ -255,25 +372,7 @@ export const stealthAddressRoutes = (app, _, done) => {
         data: null,
         message: "error while resolving sender"
       }
-    } 
-  });
-
-  // POST /tx/withdraw, to generate the transactions for the withdrawal of the funds
-  app.post('/tx/withdraw', {
-    preHandler: [authMiddleware]
-  }, async (req, res) => {
-    const { body } = req;
-    // Transaction withdrawal logic here
-    return { success: true };
-  });
-
-  // POST /tx/private-withdraw, to generate the transactions for the withdrawal of the funds, privately (using Oasis protocol)
-  app.post('/tx/private-withdraw', {
-    preHandler: [authMiddleware]
-  }, async (req, res) => {
-    const { body } = req;
-    // Private withdrawal logic using Oasis protocol
-    return { success: true };
+    }
   });
 
   done();

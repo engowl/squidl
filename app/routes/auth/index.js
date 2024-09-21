@@ -22,8 +22,7 @@ export const authRoutes = (app, _, done) => {
     try {
       const existingUser = await prismaClient.user.findFirst({
         where: {
-          address,
-          username,
+          address: address,
         },
       });
 
@@ -92,7 +91,6 @@ export const authRoutes = (app, _, done) => {
 
   app.post("/session", async (req, reply) => {
     const { authToken } = req.body;
-
     await verifyFields(req.body, ["authToken"], reply);
     try {
       const decodedToken = await verifyDynamicToken(authToken);

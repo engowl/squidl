@@ -8,6 +8,7 @@ import fastifyMultipart from "@fastify/multipart";
 import { authRoutes } from "./app/routes/auth/index.js";
 import { stealthAddressRoutes } from "./app/routes/stealth-address/index.js";
 import { priceWorker } from "./app/workers/priceWorkers.js";
+import { userRoutes } from "./app/routes/user/userRoutes.js";
 import { stealthSignerGenerateStealthAddress } from "./app/lib/contracts/oasis/oasisContract.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,8 +47,12 @@ fastify.register(stealthAddressRoutes, {
   prefix: "/stealth-address",
 });
 
+fastify.register(userRoutes, {
+  prefix: "/user",
+});
+
 /* --------------------------------- Workers -------------------------------- */
-fastify.register(priceWorker)
+// fastify.register(priceWorker);
 
 const start = async () => {
   try {
