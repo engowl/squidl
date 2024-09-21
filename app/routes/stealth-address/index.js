@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
+import { dnsDecodeName, resolverAbi, schema } from "../../utils/ensUtils.js";
+import { decodeFunctionData, isAddress, isHex } from "viem";
 
 /**
  *
@@ -67,15 +69,59 @@ export const stealthAddressRoutes = (app, _, done) => {
     return { address: wallet.address };
   });
 
-  app.get('/aliases/resolve/:sender/:data.json', async (request, reply) => {
-    const { sender, data } = request.params;
-    console.log({
-      sender,
-      data
-    })
+  // app.get('/aliases/resolve/:sender/:data.json', async (request, reply) => {
+  //   const { sender, data } = request.params;
+  //   console.log({
+  //     sender,
+  //     data
+  //   })
 
-    // Handle your logic here
-    reply.send({ message: `Resolved sender: ${sender}, data: ${data}` });
+  //   // Handle your logic here
+  //   reply.send({ message: `Resolved sender: ${sender}, data: ${data}` });
+  // });
+
+  app.get('/aliases/resolve/*', async (request, reply) => {
+    try {
+      // const { sender, data } = request.params;
+
+      // make stealth-address/aliases/resolve/:sender/:data 
+
+      const urlParts = request.url.split('/')
+
+      const [sender, data] = urlParts.slice(-2);
+      console.log({
+        sender,
+        data
+      })
+
+      // Convert sender to address,
+      // Convert data to hex
+      if(isAddress(sender) === false) {
+        throw new Error('Invalid sender address')
+      }else if(isHex(data.replace('.json', '')) === false) {
+        throw new Error('Invalid data')
+      }
+
+      const decodedResolveCall = decodeFunctionData({
+        abi: resolverAbi,
+        data: data.replace('.json', '')
+      });
+
+      console.log('decodedResolveCall', decodedResolveCall)
+
+      const name = dnsDecodeName(sender);
+      console.log('name', name)
+
+
+      return;
+    } catch (error) {
+      console.error(error)
+      return {
+        error: error.message,
+        data: null,
+        message: "error while resolving alias"
+      }
+    }
   });
 
   // POST /tx/withdraw, to generate the transactions for the withdrawal of the funds
