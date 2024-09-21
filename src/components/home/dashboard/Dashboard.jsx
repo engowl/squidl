@@ -15,6 +15,7 @@ import PaymentLinksDashboard from "./PaymentLinksDashboard.jsx";
 import useSWR from "swr";
 import { shortenAddress } from "../../../utils/string.js";
 import toast from "react-hot-toast";
+import { Icons } from "../../shared/Icons.jsx";
 
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();
@@ -127,12 +128,18 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
           </>
         )}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setOpenQr(true)}
-            className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
-          >
-            <QrCodeIcon className="size-5" />
-          </button>
+          {mode === "address" ? (
+            <button className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
+              <Icons.refresh className="text-[#563EEA] size-5" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setOpenQr(true)}
+              className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
+            >
+              <QrCodeIcon className="size-5" />
+            </button>
+          )}
           <button
             onClick={onCopy}
             className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
