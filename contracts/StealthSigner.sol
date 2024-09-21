@@ -6,8 +6,8 @@ import "hardhat/console.sol";
 
 import { Sapphire } from "@oasisprotocol/sapphire-contracts/contracts/Sapphire.sol";
 import { EthereumUtils } from "@oasisprotocol/sapphire-contracts/contracts/EthereumUtils.sol";
-import { EIP155Signer } from "@oasisprotocol/sapphire-contracts/contracts/EIP155Signer.sol";
 import { Secp256k1 } from "./Secp256k1.sol";
+import { EIP155Signer } from "@oasisprotocol/sapphire-contracts/contracts/EIP155Signer.sol";
 
 import { Enclave, autoswitch, Result } from "@oasisprotocol/sapphire-contracts/contracts/OPL.sol";
 
@@ -21,8 +21,8 @@ struct SignatureRSV {
     uint256 v;
 }
 
-// contract StealthSigner is Enclave {
-contract StealthSigner {
+contract StealthSigner is Enclave {
+// contract StealthSigner {
     bytes32 public constant EIP712_DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
     string public constant SIGNIN_TYPE = "SignIn(address user,uint32 time)";
     bytes32 public constant SIGNIN_TYPEHASH = keccak256(bytes(SIGNIN_TYPE));
@@ -48,7 +48,7 @@ contract StealthSigner {
     // address public scanner;
 
     constructor (address otherEnd)
-        // Enclave(otherEnd, autoswitch("bsc"))
+        Enclave(otherEnd, autoswitch("bsc"))
         payable
     {
         // scanner = _scanner;
@@ -61,7 +61,7 @@ contract StealthSigner {
         // spendPub = derivePubKey(bytes.concat(spendKey));
         // // (spendPubX, spendPubY) = EthereumUtils.k256Decompress(spendPub);
 
-        // registerEndpoint("register", myFunction);
+        registerEndpoint("register", _register);
 
         DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712_DOMAIN_TYPEHASH,
@@ -81,18 +81,15 @@ contract StealthSigner {
         metaAddresses[msg.sender].push(metaAddress);
     }
 
-    // function myFunction(bytes calldata _args)
-    //     internal
-    //     returns(Result)
-    // {
-    //     (uint256 a, bool b) = abi.decode(_args, (uint256, bool));
-    //     return Result.Success;
-    // }
-
     struct SignIn {
         address user;
         uint32 time;
         SignatureRSV rsv;
+    }
+
+    struct MetaAddress {
+        bytes spendPub;
+        bytes viewingPub;
     }
 
     modifier authenticated(SignIn calldata auth)
@@ -117,6 +114,37 @@ contract StealthSigner {
         require( auth.user == recovered_address, "Invalid Sign-In" );
 
         _;
+    }
+
+    function _register(bytes calldata _args)
+        internal
+        returns(Result)
+    {
+        (SignIn memory auth, bytes32 node) = abi.decode(_args, (SignIn, bytes32));
+
+        string memory metaAddress;
+        (bytes memory viewingPub, bytes32 viewingKey) = generateKeypair();
+        UserKeyPair memory spendKeyPair = spendPairs[auth.user];
+
+        // Only one spending key per user
+        if (spendKeyPair.key != 0) {
+            metaAddress = string(abi.encodePacked("st:eth:0x", bytesToHex(spendKeyPair.pub), bytesToHex(viewingPub)));
+            viewingPairs[metaAddress] = UserKeyPair(viewingPub, viewingKey);
+
+            postMessage("registerCallback", abi.encode(node, MetaAddress(spendKeyPair.pub, viewingPub)));
+        } else {
+            (bytes memory spendPub, bytes32 spendKey) = generateKeypair();
+            metaAddress = string(abi.encodePacked("st:eth:0x", bytesToHex(spendPub), bytesToHex(viewingPub)));
+            viewingPairs[metaAddress] = UserKeyPair(viewingPub, viewingKey);
+            spendPairs[auth.user] = UserKeyPair(spendPub, spendKey);
+
+            postMessage("registerCallback", abi.encode(node, MetaAddress(spendPub, viewingPub)));
+        }
+
+        owners[metaAddress] = auth.user;
+        metaAddresses[auth.user].push(metaAddress);
+
+        return Result.Success;
     }
 
     function register(SignIn calldata auth)
