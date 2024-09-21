@@ -105,17 +105,19 @@ export default function PaymentLinksDashboard({ user }) {
           {aliases.slice(0, 4).map((alias, idx) => {
             console.log({ alias });
             const bgImage = AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
+            const userAlias = alias.alias ? alias.alias : user.username;
+
             return (
               <motion.button
                 key={idx}
                 onClick={() =>
-                  navigate(`/${alias.alias}/detail/1`, {
-                    state: { layoutId: `payment-card-${alias.alias}-1` },
+                  navigate(`/${userAlias}/detail/1`, {
+                    state: { layoutId: `payment-card-${userAlias}-1` },
                     preventScrollReset: false,
                   })
                 }
                 layout
-                layoutId={`payment-card-${alias.alias}-1`}
+                layoutId={`payment-card-${userAlias}-1`}
                 transition={{ duration: 0.4 }}
                 className={cnm(
                   "relative rounded-2xl h-60 w-full flex items-start",

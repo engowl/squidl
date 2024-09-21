@@ -37,7 +37,7 @@ const confettiConfig = {
 export default function GetStartedDialog() {
   const [isOpen, setOpen] = useAtom(isGetStartedDialogAtom);
 
-  const [step, setStep] = useState("two");
+  const [step, setStep] = useState("one");
 
   return (
     <Modal
@@ -60,11 +60,14 @@ export default function GetStartedDialog() {
 
 function StepOne({ setStep }) {
   const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleUpdate() {
     if (!username) {
       return toast.error("Please provide a username");
     }
+
+    setLoading(true);
 
     try {
       const res = await squidlAPI.post("/user/update-user", {
@@ -75,6 +78,8 @@ function StepOne({ setStep }) {
       setStep("two");
     } catch (e) {
       toast.error("Error creating your username");
+    } finally {
+      setLoading(false);
     }
   }
   return (
@@ -112,6 +117,8 @@ function StepOne({ setStep }) {
       </div>
       <Button
         onClick={handleUpdate}
+        loading={loading}
+        isDisabled={loading}
         className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"
       >
         Continue
@@ -167,8 +174,11 @@ function StepTwo({ setOpen }) {
       </div>
 
       <Button
-        onClick={() => {
-          navigate("/");
+        onClick={async () => {
+          await navigator.share({
+            title: "Link",
+            text: `${user.username}.squidl.me`,
+          });
         }}
         className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"
       >
@@ -176,6 +186,7 @@ function StepTwo({ setOpen }) {
       </Button>
       <Button
         onClick={() => {
+          setOpen(false);
           navigate("/");
         }}
         className="h-16 rounded-full bg-transparent flex items-center justify-center w-full mt-1 text-purply-600"

@@ -21,6 +21,9 @@ export const router = createBrowserRouter([
       },
       {
         path: "/:alias/detail/:parent",
+        loader: ({ params }) => {
+          return `${params.alias}.squidl.me`;
+        },
         element: <AliasDetailPage />,
         children: [
           {

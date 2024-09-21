@@ -1,4 +1,4 @@
-import { Skeleton } from "@nextui-org/react";
+import { Skeleton, Spinner } from "@nextui-org/react";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -135,7 +135,13 @@ export default function BalanceChart() {
   }, [pixelData]);
 
   if (isLoading) {
-    return <Skeleton className="bg-neutral-100 w-full h-72" />;
+    return (
+      <Spinner
+        size="lg"
+        color="primary"
+        className="flex items-center justify-center w-full h-72"
+      />
+    );
   }
 
   return (

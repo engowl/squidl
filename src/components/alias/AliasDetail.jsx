@@ -3,7 +3,7 @@ import { Icons } from "../shared/Icons.jsx";
 import TxItem from "./TxItem.jsx";
 import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useSetAtom } from "jotai";
@@ -15,7 +15,10 @@ export default function AliasDetail() {
   const navigate = useNavigate();
   const setBack = useSetAtom(isBackAtom);
   const userWallets = useUserWallets();
+  const fullAlias = useLoaderData();
   const { alias, parent } = useParams();
+
+  console.log(fullAlias);
 
   const layoutId = `payment-card-${alias}-${parent}`;
 
@@ -31,6 +34,22 @@ export default function AliasDetail() {
   useEffect(() => {
     window.scrollTo(0, 0); // Reset scroll to top
   }, []);
+
+  const {
+    data: aliasAddress,
+    isLoading: loadingAlias,
+    mutate,
+    isValidating,
+  } = useSWR(
+    user
+      ? `/stealth-address/address/new-address?fullAlias=${user.username}.squidl.eth&isTestnet=true`
+      : null,
+    async (url) => {
+      const { data } = await squidlAPI.get(url);
+      console.log({ data });
+      return data.address;
+    }
+  );
 
   return (
     <div
@@ -104,9 +123,7 @@ export default function AliasDetail() {
 
         <div className="relative w-full h-52 md:h-60 flex flex-col items-center justify-start py-7 px-6">
           <div className="flex flex-row gap-2 items-center mr-auto">
-            <h1 className="text-white font-bold">
-              maisontatsuya.jane.squidl.me
-            </h1>
+            <h1 className="text-white font-bold">{fullAlias}</h1>
 
             <button onClick={() => onCopy("link")}>
               <Icons.copy className="text-[#848484] size-4" />
@@ -147,12 +164,19 @@ export default function AliasDetail() {
         }}
         className="relative bg-white rounded-[30.5px] p-2 flex items-center justify-between w-full"
       >
-        <p className="font-medium text-[#19191B] py-2 px-3">{`${shortenId(
-          "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
-        )}`}</p>
+        {loadingAlias || isValidating ? (
+          <Skeleton className="flex rounded-full w-20 h-8" />
+        ) : (
+          <p className="font-medium text-[#19191B] py-2 px-3">{`${shortenId(
+            aliasAddress
+          )}`}</p>
+        )}
 
         <div className="flex items-center gap-2">
-          <button className="bg-[#E9ECFC] rounded-full p-3">
+          <button
+            onClick={() => mutate()}
+            className="bg-[#E9ECFC] rounded-full p-3"
+          >
             <Icons.refresh className="text-[#563EEA] size-6" />
           </button>
 

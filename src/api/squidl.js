@@ -29,7 +29,10 @@ const isTokenExpired = async (token) => {
 
   try {
     const { data } = await axios.post(
-      `${import.meta.url.VITE_BACKEND_URL}/auth/session`
+      `${import.meta.env.VITE_BACKEND_URL}/auth/session`,
+      {
+        authToken: token,
+      }
     );
     const currentTime = Date.now() / 1000;
     return data.decodedToken.exp < currentTime;

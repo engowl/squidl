@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import Header from "../components/shared/Header";
 import Navbar from "../components/shared/Navbar";
 import CreateLinkDialog from "../components/dialogs/CreateLinkDialog.jsx";
+import GetStartedDialog from "../components/dialogs/GetStartedDialog.jsx";
 
 export default function AuthLayout() {
   const isLoggedIn = useIsLoggedIn();
@@ -24,7 +25,8 @@ export default function AuthLayout() {
 
   return (
     <AuthProvider>
-      <CreateLinkDialog/>
+      <CreateLinkDialog />
+      <GetStartedDialog />
       <Toaster />
       <Header />
       <Outlet />

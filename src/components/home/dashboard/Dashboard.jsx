@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { squidlAPI } from "../../../api/squidl";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { cnm } from "../../../utils/style";
-import { Button, Skeleton } from "@nextui-org/react";
+import { Button, Skeleton, Spinner } from "@nextui-org/react";
 import QrCodeIcon from "../../../assets/icons/qr-code.svg?react";
 import CopyIcon from "../../../assets/icons/copy.svg?react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,7 +40,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
-        Loading..
+        <Spinner size="lg" color="purply" />
       </div>
     );
   }
@@ -76,6 +76,22 @@ export default function Dashboard() {
 }
 
 function ReceiveCard({ setOpenQr, user, isLoading }) {
+  const {
+    data: aliasAddress,
+    isLoading: loadingAlias,
+    mutate,
+    isValidating,
+  } = useSWR(
+    user
+      ? `/stealth-address/address/new-address?fullAlias=${user.username}.squidl.eth&isTestnet=true`
+      : null,
+    async (url) => {
+      const { data } = await squidlAPI.get(url);
+      console.log({ data });
+      return data.address;
+    }
+  );
+
   const [mode, setMode] = useState("ens");
 
   const onCopy = (text) => {
@@ -129,7 +145,11 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
         ) : (
           <>
             {mode === "address" ? (
-              <p>{shortenAddress(user.address)}</p>
+              loadingAlias || isValidating ? (
+                <Skeleton className="flex rounded-full w-20 h-8" />
+              ) : (
+                <p>{shortenAddress(aliasAddress)}</p>
+              )
             ) : (
               <p>{user.username}.squidl.me</p>
             )}
@@ -137,7 +157,10 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
         )}
         <div className="flex items-center gap-2">
           {mode === "address" ? (
-            <button className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
+            <button
+              onClick={() => mutate()}
+              className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
+            >
               <Icons.refresh className="text-[#563EEA] size-5" />
             </button>
           ) : (
