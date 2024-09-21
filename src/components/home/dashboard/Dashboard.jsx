@@ -47,7 +47,7 @@ export default function Dashboard() {
   );
 }
 
-function ReceiveCard() {
+function ReceiveCard({ setOpenQr }) {
   const [mode, setMode] = useState("ens");
 
   return (
@@ -88,9 +88,12 @@ function ReceiveCard() {
       <div className="bg-white rounded-full w-full h-14 mt-4 flex items-center justify-between pl-6 pr-2 text-black">
         <p>jane.squidl.me</p>
         <div className="flex items-center gap-2">
-          <div className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
+          <button
+            onClick={() => setOpenQr(true)}
+            className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
+          >
             <QrCodeIcon className="size-5" />
-          </div>
+          </button>
           <div className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
             <CopyIcon className="size-5" />
           </div>

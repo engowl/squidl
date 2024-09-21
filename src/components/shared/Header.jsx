@@ -10,7 +10,7 @@ import {
 
 export default function Header() {
   return (
-    <nav className="flex items-center px-12 h-20 justify-between">
+    <nav className="fixed top-0 z-50 flex items-center px-5 md:px-12 h-20 justify-between bg-white md:bg-transparent w-full">
       <div className="flex flex-row items-center gap-12">
         <Link to={"/"} className="w-24">
           <img

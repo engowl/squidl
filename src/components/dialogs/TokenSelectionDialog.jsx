@@ -146,7 +146,7 @@ function Token({
 
           {isPrivate && (
             <div className="bg-[#2127FF] h-6 flex items-center justify-center text-white font-bold text-xs px-2.5 rounded-full">
-              Private
+              Private Transfer
             </div>
           )}
         </div>
