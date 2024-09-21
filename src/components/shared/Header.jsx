@@ -30,7 +30,7 @@ export default function Header() {
           onClick={() => setCreateLinkModal(true)}
           className={"bg-[#563EEA] h-12 rounded-[24px] px-4"}
         >
-          <Icons.link className="text-white"/>
+          <Icons.link className="text-white" />
           <h1 className={"text-sm font-medium text-white"}>Create Link</h1>
         </Button>
 

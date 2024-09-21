@@ -205,7 +205,7 @@ export function Transfer() {
         </div>
       </div>
 
-      <Button className="h-16 mt-[10vh] md:mt-[15vh] bg-[#563EEA] w-full rounded-[42px] font-bold">
+      <Button className="h-16 mt-[10vh] md:mt-[15vh] bg-[#563EEA] w-full rounded-[42px] font-bold text-white">
         Transfer
       </Button>
     </div>
