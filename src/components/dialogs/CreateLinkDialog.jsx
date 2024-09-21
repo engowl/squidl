@@ -3,7 +3,8 @@ import { isCreateLinkDialogAtom } from "../../store/dialog-store.js";
 import { useAtom } from "jotai";
 import { Button, Input, Modal, ModalContent } from "@nextui-org/react";
 import { useEffect, useState } from "react";
-import SquidlLogo from "../../assets/squidl.svg?react";
+import { Icons } from "../shared/Icons.jsx";
+import Nounsies from "../shared/Nounsies.jsx";
 
 const confettiConfig = {
   angle: 90, // Angle at which the confetti will explode
@@ -27,6 +28,7 @@ export default function CreateLinkDialog({ onSuccess }) {
       onOpenChange={setOpen}
       isKeyboardDismissDisabled={true}
       hideCloseButton
+      placement="center"
     >
       <ModalContent className="bg-white rounded-4xl p-8 max-w-[562px] flex flex-col items-start relative">
         {/* <StepOne /> */}
@@ -86,24 +88,50 @@ function StepTwo() {
 
   return (
     <>
-      <p className="text-2xl font-semibold">You're all set!</p>
+      <p className="text-2xl font-semibold">Your Payment link is ready!</p>
       <p className="text-lg mt-4">
-        Your Squidl username is live and ready for action. Share it with anyone
-        to start receiving payments like a pro
+        Share it via email, social media, or copy and paste it anywhere. Manage
+        and track payments easily from your dashboard
       </p>
       {/* Card */}
-      <div className="w-full rounded-2xl bg-purply-600 h-[221px] mt-5 flex flex-col overflow-hidden relative">
-        <div className="w-full flex items-center justify-end px-6 py-5 text-white">
-          <p className="text-xl">your-username.squidl.me</p>
+      <div className="relative w-full h-full mt-5">
+        <img
+          src="/assets/card.png"
+          alt="card-placeholder"
+          className="absolute w-full h-full object-cover rounded-2xl"
+        />
+
+        <div className="absolute right-5 top-5 size-12 rounded-full overflow-hidden">
+          <Nounsies address={"maisontatsuya.jane.squidl.me"} />
         </div>
-        <div className="bg-purply-50 flex-1 flex flex-col justify-end">
-          <div className="w-full flex items-end justify-between py-5 px-6">
-            <p className="text-purply-600 text-2xl font-medium">SQUIDL</p>
-            <SquidlLogo className="w-14" />
+
+        <div className="relative w-full h-52 md:h-60 flex flex-col items-center justify-start py-7 px-6">
+          <div className="flex flex-row gap-2 items-center mr-auto">
+            <h1 className="text-white font-bold">
+              maisontatsuya.jane.squidl.me
+            </h1>
+
+            <button onClick={() => onCopy("link")}>
+              <Icons.copy className="text-[#848484] size-4" />
+            </button>
+          </div>
+
+          <h1 className="absolute top-1/2 -translate-y-1/2 text-white font-extrabold text-2xl">
+            $8,888,888.88
+          </h1>
+
+          <div className="absolute left-5 bottom-6 flex items-center justify-between">
+            <h1 className="text-[#484B4E] font-bold text-2xl">SQUIDL</h1>
+          </div>
+
+          <div className="absolute right-5 bottom-6 flex items-center justify-between">
+            <img
+              src="/assets/squidl-logo-only.png"
+              alt="logo"
+              className="object-contain w-12 h-16"
+            />
           </div>
         </div>
-        {/* Image */}
-        <div className="absolute size-24 top-6 left-6 rounded-xl bg-neutral-200"></div>
       </div>
 
       <Button className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600">

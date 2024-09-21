@@ -41,6 +41,7 @@ export default function GetStartedDialog() {
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       hideCloseButton
+      placement="center"
     >
       <ModalContent className="bg-white rounded-4xl p-8 max-w-[562px] flex flex-col items-start relative">
         <StepOne />
