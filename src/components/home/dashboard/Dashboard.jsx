@@ -39,7 +39,7 @@ export default function Dashboard() {
 
       <motion.div
         layoutScroll
-        className="w-full h-screen flex flex-col items-center  overflow-y-auto"
+        className="w-full h-screen flex flex-col items-center py-20  overflow-y-auto"
       >
         <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
           <ReceiveCard setOpenQr={setOpenQr} />

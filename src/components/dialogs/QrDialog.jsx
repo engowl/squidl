@@ -1,7 +1,17 @@
 import { Button, Modal, ModalContent } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
+import toast from "react-hot-toast";
 
 export default function QrDialog({ open, setOpen, qrUrl }) {
+  const onCopy = (text) => {
+    toast.success("Copied to clipboard", {
+      id: "copy",
+      duration: 1000,
+      position: "bottom-center",
+    });
+    navigator.clipboard.writeText(text);
+  };
+
   const handleShare = async () => {
     try {
       const response = await fetch(qrUrl);
@@ -31,27 +41,17 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
     try {
       const response = await fetch(qrUrl);
       const blob = await response.blob();
-
-      // Create a link element
       const link = document.createElement("a");
 
-      // Create a URL for the blob
       const url = URL.createObjectURL(blob);
 
-      // Set the link's href to the blob URL
       link.href = url;
-      link.download = "qr-code.png"; // Set the file name
+      link.download = "qr-code.png";
 
-      // Append the link to the document body
       document.body.appendChild(link);
-
-      // Programmatically click the link to trigger the download
       link.click();
-
-      // Remove the link from the document
       document.body.removeChild(link);
 
-      // Release the blob URL after download
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading the image:", error);

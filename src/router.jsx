@@ -20,6 +20,12 @@ export const router = createBrowserRouter([
       {
         path: "/:alias/detail",
         element: <AliasDetailPage />,
+        children: [
+          {
+            path: "transfer",
+            element: <TransferPage />,
+          },
+        ],
       },
       {
         path: "/:alias/transfer",
