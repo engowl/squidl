@@ -5,9 +5,21 @@ import {
   AVAILABLE_CARDS_BG,
   paymentLinks,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
+import useSWR from "swr";
+import { squidlAPI } from "../../api/squidl.js";
 
 export default function PaymentLinks() {
   const navigate = useNavigate();
+
+  const { data: aliases, isLoading } = useSWR(
+    "/stealth-address/aliases",
+    async (url) => {
+      const { data } = await squidlAPI.get(url);
+      return data;
+    }
+  );
+
+  console.log({ aliases });
 
   return (
     <div

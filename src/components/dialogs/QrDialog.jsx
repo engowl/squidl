@@ -2,8 +2,19 @@ import { Button, Modal, ModalContent } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import toast from "react-hot-toast";
 import Chains from "../shared/Chains.jsx";
+import { QRCode } from "react-qrcode-logo";
+import useSWR from "swr";
+import { squidlAPI } from "../../api/squidl.js";
+import { useRef } from "react";
 
 export default function QrDialog({ open, setOpen, qrUrl }) {
+  const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
+
+  const qrRef = useRef(null);
+
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
       id: "copy",
@@ -40,24 +51,13 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(qrUrl);
-      const blob = await response.blob();
-      const link = document.createElement("a");
-
-      const url = URL.createObjectURL(blob);
-
-      link.href = url;
-      link.download = "qr-code.png";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      URL.revokeObjectURL(url);
+      await qrRef.current.download();
     } catch (error) {
       console.error("Error downloading the image:", error);
     }
   };
+
+  if (isLoading) return null;
 
   return (
     <Modal
@@ -86,16 +86,29 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
         <div className="px-5 md:px-12">
           <div className="bg-[#563EEA] rounded-[24px] px-5 py-4 flex flex-col items-center justify-center w-full">
             <div className="w-full h-full bg-white p-5 rounded-[24px]">
-              <img
+              {/* <img
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png"
                 alt="qr"
                 className="w-full h-full object-contain"
+              /> */}
+
+              <QRCode
+                ref={qrRef}
+                value={`${user.username}.squidl.me`}
+                qrStyle="dots"
+                logoImage="/assets/squid-qr.png"
+                logoWidth={40}
+                logoHeight={40}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                }}
               />
             </div>
 
             <div className="flex flex-row items-center gap-2.5 mt-3">
               <h1 className="font-medium text-lg text-[#F4F4F4]">
-                jane.squidl.me
+                {user.username}.squidl.me
               </h1>
               <button onClick={() => onCopy("link")}>
                 <Icons.copy className="text-[#B9BCFF]" />

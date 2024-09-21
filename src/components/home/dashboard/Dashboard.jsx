@@ -37,6 +37,14 @@ export default function Dashboard() {
     }
   }, [isBackValue.isBack]);
 
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        Loading..
+      </div>
+    );
+  }
+
   return (
     <>
       <QrDialog
@@ -59,7 +67,7 @@ export default function Dashboard() {
               isLoading={isLoading}
             />
             <TotalBalance />
-            <PaymentLinksDashboard />
+            <PaymentLinksDashboard user={user} />
           </div>
         </div>
       </motion.div>

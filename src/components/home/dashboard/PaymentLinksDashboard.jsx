@@ -3,7 +3,9 @@ import { cnm } from "../../../utils/style.js";
 import { useNavigate } from "react-router-dom";
 import { useAtomValue } from "jotai";
 import { isBackAtom } from "../../../store/payment-card-store.js";
-import { Button } from "@nextui-org/react";
+import { Button, Skeleton } from "@nextui-org/react";
+import useSWR from "swr";
+import { squidlAPI } from "../../../api/squidl.js";
 
 export const paymentLinks = [
   {
@@ -39,9 +41,19 @@ export const AVAILABLE_CARDS_BG = [
   "/assets/card-4.png",
 ];
 
-export default function PaymentLinksDashboard() {
+export default function PaymentLinksDashboard({ user }) {
   const navigate = useNavigate();
   const isBackValue = useAtomValue(isBackAtom);
+
+  const { data: aliases, isLoading } = useSWR(
+    "/stealth-address/aliases",
+    async (url) => {
+      const { data } = await squidlAPI.get(url);
+      return data;
+    }
+  );
+
+  console.log({ aliases });
 
   console.log(isBackValue);
 
@@ -86,64 +98,72 @@ export default function PaymentLinksDashboard() {
           See More
         </Button>
       </motion.div>
-      <div className="w-full flex flex-col px-6">
-        {paymentLinks.slice(0, 4).map((link, idx) => {
-          const bgImage = AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
-          return (
-            <motion.button
-              key={idx}
-              onClick={() =>
-                navigate(`/${link.name}/detail/1`, {
-                  state: { layoutId: `payment-card-${link.name}-1` },
-                  preventScrollReset: false,
-                })
-              }
-              layout
-              layoutId={`payment-card-${link.name}-1`}
-              transition={{ duration: 0.4 }}
-              className={cnm(
-                "relative rounded-2xl h-60 w-full flex items-start",
-                link.colorClassname,
-                idx > 0 && "-mt-36 md:-mt-44"
-              )}
-              whileHover={{ rotate: -5, y: -10 }}
-              viewport={{ once: true, amount: 0.5 }}
-            >
-              <img
-                src={bgImage}
-                alt="card-bg"
-                className="absolute w-full h-full object-cover rounded-[24px] inset-0"
-              />
-
-              <div
+      {isLoading ? (
+        <Skeleton className="rounded-2xl w-full h-72" />
+      ) : (
+        <div className="w-full flex flex-col px-6">
+          {aliases.slice(0, 4).map((alias, idx) => {
+            console.log({ alias });
+            const bgImage = AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
+            return (
+              <motion.button
+                key={idx}
+                onClick={() =>
+                  navigate(`/${alias.alias}/detail/1`, {
+                    state: { layoutId: `payment-card-${alias.alias}-1` },
+                    preventScrollReset: false,
+                  })
+                }
+                layout
+                layoutId={`payment-card-${alias.alias}-1`}
+                transition={{ duration: 0.4 }}
                 className={cnm(
-                  "relative px-6 py-5 w-full flex items-center justify-between",
-                  `${
-                    bgImage === "/assets/card-2.png"
-                      ? "text-black"
-                      : "text-white"
-                  }`
+                  "relative rounded-2xl h-60 w-full flex items-start",
+                  idx > 0 && "-mt-36 md:-mt-44"
                 )}
+                whileHover={{ rotate: -5, y: -10 }}
+                viewport={{ once: true, amount: 0.5 }}
               >
-                <p className="font-medium">{link.name}</p>
-                <p>${(293912).toLocaleString("en-US")}</p>
-              </div>
-
-              <div className="absolute left-5 bottom-6 flex items-center justify-between">
-                <h1 className="text-[#484B4E] font-bold text-2xl">SQUIDL</h1>
-              </div>
-
-              <div className="absolute right-5 bottom-6 flex items-center justify-between">
                 <img
-                  src="/assets/squidl-logo-only.png"
-                  alt="logo"
-                  className="object-contain w-12 h-16"
+                  src={bgImage}
+                  alt="card-bg"
+                  className="absolute w-full h-full object-cover rounded-[24px] inset-0"
                 />
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
+
+                <div
+                  className={cnm(
+                    "relative px-6 py-5 w-full flex items-center justify-between",
+                    `${
+                      bgImage === "/assets/card-2.png"
+                        ? "text-black"
+                        : "text-white"
+                    }`
+                  )}
+                >
+                  <p className="font-medium">
+                    {alias.alias ? `${alias.alias}.` : ``}
+                    {user.username}
+                    .squidl.me
+                  </p>
+                  <p>${alias.balanceUsd.toLocaleString("en-US")}</p>
+                </div>
+
+                <div className="absolute left-5 bottom-6 flex items-center justify-between">
+                  <h1 className="text-[#484B4E] font-bold text-2xl">SQUIDL</h1>
+                </div>
+
+                <div className="absolute right-5 bottom-6 flex items-center justify-between">
+                  <img
+                    src="/assets/squidl-logo-only.png"
+                    alt="logo"
+                    className="object-contain w-12 h-16"
+                  />
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

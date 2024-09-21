@@ -25,7 +25,6 @@ export default function Payment() {
     }
   );
 
-  console.log({ user });
   const { data: aliasAddress, isLoading } = useSWR(
     user
       ? `/stealth-address/address/new-address?fullAlias=${user.username}.squidl.eth&isTestnet=true`
@@ -36,8 +35,6 @@ export default function Payment() {
       return data.address;
     }
   );
-
-  console.log({ aliasAddress });
 
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
@@ -116,7 +113,9 @@ export default function Payment() {
                   <QRCode
                     value={`${user.username}.squidl.me`}
                     qrStyle="dots"
-                    logoImage="/assets/squidl-logo-only.png"
+                    logoImage="/assets/squid-qr.png"
+                    logoHeight={120}
+                    logoWidth={120}
                     style={{
                       width: "100%",
                       height: "100%",
