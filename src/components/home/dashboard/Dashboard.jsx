@@ -119,7 +119,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
       </div>
       <div className="bg-white rounded-full w-full h-14 mt-4 flex items-center justify-between pl-6 pr-2 text-black">
         {isLoading ? (
-          <Skeleton className="w-24 h-8" />
+          <Skeleton className="w-32 h-5 rounded-xl" />
         ) : (
           <>
             {mode === "address" ? (
