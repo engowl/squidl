@@ -9,6 +9,8 @@ import PaymentLinks from "./PaymentLinks";
 
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();
+  const [openQr, setOpenQr] = useState(false);
+
   useEffect(() => {
     squidlAPI.get("/auth/me").then(({ data }) => {
       console.log(data);
@@ -26,20 +28,30 @@ export default function Dashboard() {
     }
   }, [isBackValue.isBack]);
   return (
-    <motion.div
-      layoutScroll
-      className="w-full h-screen flex flex-col items-center  overflow-y-auto"
-    >
-      <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
-        <ReceiveCard />
-        <TotalBalance />
-        <PaymentLinks />
-      </div>
-    </motion.div>
+    <>
+      <QrDialog
+        open={openQr}
+        setOpen={setOpenQr}
+        qrUrl={
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png"
+        }
+      />
+
+      <motion.div
+        layoutScroll
+        className="w-full h-screen flex flex-col items-center  overflow-y-auto"
+      >
+        <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
+          <ReceiveCard setOpenQr={setOpenQr} />
+          <TotalBalance />
+          <PaymentLinks />
+        </div>
+      </motion.div>
+    </>
   );
 }
 
-function ReceiveCard() {
+function ReceiveCard({ setOpenQr }) {
   const [mode, setMode] = useState("ens");
 
   return (
@@ -80,9 +92,12 @@ function ReceiveCard() {
       <div className="bg-white rounded-full w-full h-14 mt-4 flex items-center justify-between pl-6 pr-2 text-black">
         <p>jane.squidl.me</p>
         <div className="flex items-center gap-2">
-          <div className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
+          <button
+            onClick={() => setOpenQr(true)}
+            className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
+          >
             <QrCodeIcon className="size-5" />
-          </div>
+          </button>
           <div className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
             <CopyIcon className="size-5" />
           </div>
@@ -160,6 +175,7 @@ import {
 import { motion } from "framer-motion";
 import { useAtomValue } from "jotai";
 import { isBackAtom } from "../../../store/payment-card-store";
+import QrDialog from "../../dialogs/QrDialog.jsx";
 
 const data = [
   { name: "Page A", uv: 400 },

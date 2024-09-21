@@ -10,7 +10,7 @@ import {
 
 export default function Header() {
   return (
-    <nav className="flex items-center px-12 h-20 justify-between">
+    <nav className="flex items-center px-5 md:px-12 h-20 justify-between">
       <div className="flex flex-row items-center gap-12">
         <div className="w-24">
           <img
