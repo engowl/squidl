@@ -1,8 +1,9 @@
 import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
-import { dnsDecodeName, resolverAbi, schema } from "../../utils/ensUtils.js";
-import { decodeFunctionData, isAddress, isHex } from "viem";
+import { dnsDecodeName, handleQuery, resolverAbi, schema } from "../../utils/ensUtils.js";
+import { concat, decodeFunctionData, encodeAbiParameters, encodePacked, isAddress, isHex, keccak256, toHex } from "viem";
+import { sign } from "viem/accounts";
 
 /**
  *
@@ -96,9 +97,9 @@ export const stealthAddressRoutes = (app, _, done) => {
 
       // Convert sender to address,
       // Convert data to hex
-      if(isAddress(sender) === false) {
+      if (isAddress(sender) === false) {
         throw new Error('Invalid sender address')
-      }else if(isHex(data.replace('.json', '')) === false) {
+      } else if (isHex(data.replace('.json', '')) === false) {
         throw new Error('Invalid data')
       }
 
@@ -109,11 +110,55 @@ export const stealthAddressRoutes = (app, _, done) => {
 
       console.log('decodedResolveCall', decodedResolveCall)
 
-      const name = dnsDecodeName(sender);
-      console.log('name', name)
+      const name = dnsDecodeName(decodedResolveCall.args[0]);
+      console.log('name:', name)
 
+      // it will be [...].squidl.eth , read the [...] , so the 3rd element, if they try to become [...].[...].squidl.eth, it will be still be the 3rd element from the last
+      const alias = name.split('.')[name.split('.').length - 3];
+      console.log('alias:', alias)
 
-      return;
+      const resolvedAddress = ethers.Wallet.createRandom().address;
+
+      const { result, ttl } = await handleQuery({
+        dnsEncodedName: decodedResolveCall.args[0],
+        encodedResolveCall: decodedResolveCall.args[1],
+        env: null
+      })
+      const validUntil = Math.floor(Date.now() / 1000 + ttl)
+
+      const messageHash = keccak256(
+        encodePacked(
+          ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],
+          [
+            '0x1900', // This is hardcoded in the contract but idk why
+            sender, // target: The address the signature is for.
+            BigInt(validUntil), // expires: The timestamp at which the response becomes invalid.
+            keccak256(data), // request: The original request that was sent.
+            keccak256(result), // result: The `result` field of the response (not including the signature part).
+          ]
+        )
+      )
+
+      const sig = await sign({
+        hash: messageHash,
+        privateKey: process.env.ENS_RESOLVER_PK,
+      })
+      console.log('sig:', sig)
+      const sigData = concat([sig.r, sig.s, toHex(sig.v)])
+      console.log('sigData:', sigData)
+
+      const encodedResponse = encodeAbiParameters(
+        [
+          { name: 'result', type: 'bytes' },
+          { name: 'expires', type: 'uint64' },
+          { name: 'sig', type: 'bytes' },
+        ],
+        [result, BigInt(validUntil), sigData]
+      )
+
+      console.log('encodedResponse:', encodedResponse)
+
+      return encodedResponse;
     } catch (error) {
       console.error(error)
       return {
