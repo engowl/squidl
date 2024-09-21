@@ -1,10 +1,21 @@
 import Confetti from "react-dom-confetti";
 import { isCreateLinkDialogAtom } from "../../store/dialog-store.js";
 import { useAtom } from "jotai";
-import { Button, Input, Modal, ModalContent } from "@nextui-org/react";
+import {
+  Button,
+  Input,
+  Modal,
+  ModalContent,
+  Skeleton,
+} from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Icons } from "../shared/Icons.jsx";
 import Nounsies from "../shared/Nounsies.jsx";
+import { validateAlphanumeric } from "../../utils/string.js";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
+import { squidlAPI } from "../../api/squidl.js";
 
 const confettiConfig = {
   angle: 90, // Angle at which the confetti will explode
@@ -21,6 +32,11 @@ const confettiConfig = {
 
 export default function CreateLinkDialog({ onSuccess }) {
   const [isOpen, setOpen] = useAtom(isCreateLinkDialogAtom);
+  const [step, setStep] = useState("one");
+  const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
 
   return (
     <Modal
@@ -38,14 +54,43 @@ export default function CreateLinkDialog({ onSuccess }) {
           <Icons.close classNamet="text-black size-6" />
         </button>
 
-        {/* <StepOne /> */}
-        <StepTwo />
+        {step === "one" ? (
+          <StepOne setStep={setStep} isLoading={isLoading} user={user} />
+        ) : (
+          <StepTwo isLoading={isLoading} user={user} setOpen={setOpen} />
+        )}
       </ModalContent>
     </Modal>
   );
 }
 
-function StepOne() {
+function StepOne({ setStep, isLoading, user }) {
+  const [alias, setAlias] = useState("");
+
+  async function handleUpdate() {
+    if (!alias) {
+      return toast.error("Please provide an alias");
+    }
+
+    if (!validateAlphanumeric(alias)) {
+      return toast.error("Only letters and numbers are allowed");
+    }
+
+    if (alias.length > 15) {
+      return toast.error("Alias can't be more than 15 characters");
+    }
+
+    try {
+      const res = await squidlAPI.post("/stealth-address/aliases/new-alias", {
+        alias,
+      });
+      console.log({ res });
+      toast.success("Your alias has been created!");
+      setStep("two");
+    } catch (e) {
+      toast.error("Error creating your alias");
+    }
+  }
   return (
     <>
       <p className="text-2xl font-semibold">Create payment link</p>
@@ -70,20 +115,36 @@ function StepOne() {
             input:
               "focus-visible:outline-purply text-base placeholder:text-neutral-300",
           }}
-          placeholder="your-username"
+          value={alias}
+          onChange={(e) => {
+            const val = e.target.value;
+            setAlias(val);
+          }}
+          place
+          placeholder="your-alias"
           variant="bordered"
         />
-        <p className="absolute right-4 text-neutral-400">squidl.me</p>
+        {isLoading ? (
+          <Skeleton className="w-25 h-6" />
+        ) : (
+          <p className="absolute right-4 text-neutral-400">
+            .{user.username}.squidl.me
+          </p>
+        )}
       </div>
-      <Button className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600">
+      <Button
+        onClick={handleUpdate}
+        className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"
+      >
         Continue
       </Button>
     </>
   );
 }
 
-function StepTwo() {
+function StepTwo({ user, isLoading, setOpen }) {
   const [confettiTrigger, setConfettiTrigger] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -115,7 +176,13 @@ function StepTwo() {
         <div className="relative w-full h-52 md:h-60 flex flex-col items-center justify-start py-7 px-6">
           <div className="flex flex-row gap-2 items-center mr-auto">
             <h1 className="text-white font-bold">
-              maisontatsuya.jane.squidl.me
+              {isLoading ? (
+                <Skeleton className="w-25 h-6" />
+              ) : (
+                <p className="absolute right-4 text-neutral-400">
+                  {""}.{user.username}.squidl.me
+                </p>
+              )}
             </h1>
 
             <button onClick={() => onCopy("link")}>
@@ -124,7 +191,7 @@ function StepTwo() {
           </div>
 
           <h1 className="absolute top-1/2 -translate-y-1/2 text-white font-extrabold text-2xl">
-            $8,888,888.88
+            $0
           </h1>
 
           <div className="absolute left-5 bottom-6 flex items-center justify-between">
@@ -144,7 +211,13 @@ function StepTwo() {
       <Button className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600">
         Start Sharing
       </Button>
-      <Button className="h-16 rounded-full bg-transparent flex items-center justify-center w-full mt-1 text-purply-600">
+      <Button
+        onClick={() => {
+          setOpen(false);
+          navigate("/");
+        }}
+        className="h-16 rounded-full bg-transparent flex items-center justify-center w-full mt-1 text-purply-600"
+      >
         Go to dashboard
       </Button>
       <div className="absolute inset-0 overflow-hidden flex flex-col items-center mx-auto pointer-events-none">

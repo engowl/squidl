@@ -9,8 +9,7 @@ import Header from "../components/shared/Header";
 import Navbar from "../components/shared/Navbar";
 
 export default function AuthLayout() {
-  // const isLoggedIn = useIsLoggedIn();
-  const isLoggedIn = true;
+  const isLoggedIn = useIsLoggedIn();
 
   if (!isLoggedIn) {
     return (

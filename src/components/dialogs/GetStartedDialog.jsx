@@ -7,51 +7,76 @@ import {
   Button,
   useDisclosure,
   Input,
+  Skeleton,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import Confetti from "react-dom-confetti";
 import SquidlLogo from "../../assets/squidl.svg?react";
 import { useAtom } from "jotai";
 import { isGetStartedDialogAtom } from "../../store/dialog-store";
+import toast from "react-hot-toast";
+import { squidlAPI } from "../../api/squidl";
+import { useUserWallets } from "@dynamic-labs/sdk-react-core";
+import Nounsies from "../shared/Nounsies";
+import useSWR from "swr";
+import { useNavigate } from "react-router-dom";
 
 const confettiConfig = {
-  angle: 90, // Angle at which the confetti will explode
-  spread: 300, // How much area the confetti will cover
-  startVelocity: 20, // Starting speed of the particles
-  elementCount: 60, // Number of confetti pieces
-  dragFriction: 0.1, // Drag friction applied to particles
-  duration: 3000, // How long the confetti effect lasts
-  stagger: 3, // Delay between confetti particle launch
-  width: "8px", // Width of confetti pieces
-  height: "8px", // Height of confetti pieces
-  perspective: "500px", // Perspective value for 3D effect
+  angle: 90,
+  spread: 300,
+  startVelocity: 20,
+  elementCount: 60,
+  dragFriction: 0.1,
+  duration: 3000,
+  stagger: 3,
+  width: "8px",
+  height: "8px",
+  perspective: "500px",
 };
 
 export default function GetStartedDialog() {
   const [isOpen, setOpen] = useAtom(isGetStartedDialogAtom);
 
-  const [step, setStep] = useState(false);
-
-  const onOpenChange = () => {};
+  const [step, setStep] = useState("two");
 
   return (
     <Modal
       isOpen={isOpen}
-      onOpenChange={onOpenChange}
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       hideCloseButton
       placement="center"
     >
       <ModalContent className="bg-white rounded-4xl p-8 max-w-[562px] flex flex-col items-start relative">
-        <StepOne />
-        {/* <StepTwo /> */}
+        {step === "one" ? (
+          <StepOne setStep={setStep} />
+        ) : (
+          <StepTwo setOpen={setOpen} />
+        )}
       </ModalContent>
     </Modal>
   );
 }
 
-function StepOne() {
+function StepOne({ setStep }) {
+  const [username, setUsername] = useState("");
+
+  async function handleUpdate() {
+    if (!username) {
+      return toast.error("Please provide a username");
+    }
+
+    try {
+      const res = await squidlAPI.post("/user/update-user", {
+        username: username,
+      });
+      console.log({ res });
+      toast.success("Your username has been created!");
+      setStep("two");
+    } catch (e) {
+      toast.error("Error creating your username");
+    }
+  }
   return (
     <>
       <p className="text-2xl font-semibold">Let's get started!</p>
@@ -75,20 +100,35 @@ function StepOne() {
             input:
               "focus-visible:outline-purply text-base placeholder:text-neutral-300",
           }}
+          value={username}
+          onChange={(e) => {
+            const val = e.target.value;
+            setUsername(val);
+          }}
           placeholder="your-username"
           variant="bordered"
         />
         <p className="absolute right-4 text-neutral-400">squidl.me</p>
       </div>
-      <Button className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600">
+      <Button
+        onClick={handleUpdate}
+        className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"
+      >
         Continue
       </Button>
     </>
   );
 }
 
-function StepTwo() {
+function StepTwo({ setOpen }) {
   const [confettiTrigger, setConfettiTrigger] = useState(false);
+  const userWallets = useUserWallets();
+  const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -108,7 +148,11 @@ function StepTwo() {
       {/* Card */}
       <div className="w-full rounded-2xl bg-purply-600 h-[221px] mt-5 flex flex-col overflow-hidden relative">
         <div className="w-full flex items-center justify-end px-6 py-5 text-white">
-          <p className="text-xl">your-username.squidl.me</p>
+          {isLoading ? (
+            <Skeleton className="w-24 h-8 rounded-md" />
+          ) : (
+            <p className="text-xl">{user.username}.squidl.me</p>
+          )}
         </div>
         <div className="bg-purply-50 flex-1 flex flex-col justify-end">
           <div className="w-full flex items-end justify-between py-5 px-6">
@@ -117,13 +161,25 @@ function StepTwo() {
           </div>
         </div>
         {/* Image */}
-        <div className="absolute size-24 top-6 left-6 rounded-xl bg-neutral-200"></div>
+        <div className="absolute size-24 top-6 left-6 rounded-xl bg-neutral-200 overflow-hidden">
+          <Nounsies address={userWallets[0]?.address} />
+        </div>
       </div>
 
-      <Button className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600">
+      <Button
+        onClick={() => {
+          navigate("/");
+        }}
+        className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"
+      >
         Start Sharing
       </Button>
-      <Button className="h-16 rounded-full bg-transparent flex items-center justify-center w-full mt-1 text-purply-600">
+      <Button
+        onClick={() => {
+          navigate("/");
+        }}
+        className="h-16 rounded-full bg-transparent flex items-center justify-center w-full mt-1 text-purply-600"
+      >
         Go to dashboard
       </Button>
       <div className="absolute inset-0 overflow-hidden flex flex-col items-center mx-auto pointer-events-none">

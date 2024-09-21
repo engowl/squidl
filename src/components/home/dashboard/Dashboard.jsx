@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { squidlAPI } from "../../../api/squidl";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { cnm } from "../../../utils/style";
-import { Button } from "@nextui-org/react";
+import { Button, Skeleton } from "@nextui-org/react";
 import QrCodeIcon from "../../../assets/icons/qr-code.svg?react";
 import CopyIcon from "../../../assets/icons/copy.svg?react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -13,18 +13,20 @@ import { Fingerprint, Handshake, Lock } from "lucide-react";
 import CreateLinkDialog from "../../dialogs/CreateLinkDialog.jsx";
 import QrDialog from "../../dialogs/QrDialog.jsx";
 import PaymentLinksDashboard from "./PaymentLinksDashboard.jsx";
+import useSWR from "swr";
+import { shortenAddress } from "../../../utils/string.js";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();
   const [openQr, setOpenQr] = useState(false);
 
-  useEffect(() => {
-    squidlAPI.get("/auth/me").then(({ data }) => {
-      console.log(data);
-    });
-  }, []);
-
   const isBackValue = useAtomValue(isBackAtom);
+
+  const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
 
   useEffect(() => {
     if (isBackValue.isBack) {
@@ -37,11 +39,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <CreateLinkDialog
-        onSuccess={() => {
-          // Do refresh
-        }}
-      />
+      <CreateLinkDialog />
 
       <QrDialog
         open={openQr}
@@ -57,7 +55,11 @@ export default function Dashboard() {
       >
         <div className="flex flex-col items-center py-20 w-full">
           <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
-            <ReceiveCard setOpenQr={setOpenQr} />
+            <ReceiveCard
+              setOpenQr={setOpenQr}
+              user={user}
+              isLoading={isLoading}
+            />
             <TotalBalance />
             <PaymentLinksDashboard />
           </div>
@@ -67,8 +69,18 @@ export default function Dashboard() {
   );
 }
 
-function ReceiveCard({ setOpenQr }) {
+function ReceiveCard({ setOpenQr, user, isLoading }) {
   const [mode, setMode] = useState("ens");
+
+  const onCopy = (text) => {
+    navigator.clipboard.writeText(
+      mode === "ens" ? `${user.username}.squidl.me` : `${user.address}`
+    );
+    toast.success("Copied to clipboard", {
+      duration: 1000,
+      position: "bottom-center",
+    });
+  };
 
   return (
     <div className="bg-purply p-4 rounded-3xl text-white w-full">
@@ -106,7 +118,17 @@ function ReceiveCard({ setOpenQr }) {
         </div>
       </div>
       <div className="bg-white rounded-full w-full h-14 mt-4 flex items-center justify-between pl-6 pr-2 text-black">
-        <p>jane.squidl.me</p>
+        {isLoading ? (
+          <Skeleton className="w-24 h-8" />
+        ) : (
+          <>
+            {mode === "address" ? (
+              <p>{shortenAddress(user.address)}</p>
+            ) : (
+              <p>{user.username}.squidl.me</p>
+            )}
+          </>
+        )}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setOpenQr(true)}
@@ -114,9 +136,12 @@ function ReceiveCard({ setOpenQr }) {
           >
             <QrCodeIcon className="size-5" />
           </button>
-          <div className="bg-purply-50 size-9 rounded-full flex items-center justify-center">
+          <button
+            onClick={onCopy}
+            className="bg-purply-50 size-9 rounded-full flex items-center justify-center"
+          >
             <CopyIcon className="size-5" />
-          </div>
+          </button>
         </div>
       </div>
     </div>
@@ -149,7 +174,7 @@ function TotalBalance() {
                 setMode("available");
               }}
               className={cnm(
-                "w-24 h-8 rounded-full flex items-center justify-center relative transition-colors",
+                "w-24 h-9 rounded-full flex items-center justify-center relative transition-colors",
                 mode === "ens" ? "text-black" : "text-neutral-500"
               )}
             >
@@ -160,7 +185,7 @@ function TotalBalance() {
                 setMode("private");
               }}
               className={cnm(
-                "w-24 h-8 rounded-full flex items-center justify-center relative transition-colors",
+                "w-24 h-9 rounded-full flex items-center justify-center relative transition-colors",
                 mode === "private" ? "text-white" : "text-neutral-500"
               )}
             >

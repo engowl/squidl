@@ -1,9 +1,12 @@
 import { getAuthToken, useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useEffect } from "react";
 import { squidlAPI } from "../api/squidl";
+import { isGetStartedDialogAtom } from "../store/dialog-store";
+import { useAtom } from "jotai";
 
 export default function AuthProvider({ children }) {
   const { user, handleLogOut } = useDynamicContext();
+  const [, setOpen] = useAtom(isGetStartedDialogAtom);
   useEffect(() => {
     if (user) {
       squidlAPI
@@ -12,7 +15,10 @@ export default function AuthProvider({ children }) {
           username: "",
         })
         .then(({ data }) => {
-          console.log({ data });
+          console.log({ data }, "ON LOGINNN");
+          if (!data.username) {
+            return setOpen(true);
+          }
         })
         .catch(() => {
           handleLogOut();

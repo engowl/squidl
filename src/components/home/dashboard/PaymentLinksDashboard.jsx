@@ -3,6 +3,7 @@ import { cnm } from "../../../utils/style.js";
 import { useNavigate } from "react-router-dom";
 import { useAtomValue } from "jotai";
 import { isBackAtom } from "../../../store/payment-card-store.js";
+import { Button } from "@nextui-org/react";
 
 export const paymentLinks = [
   {
@@ -45,7 +46,10 @@ export default function PaymentLinksDashboard() {
   console.log(isBackValue);
 
   return (
-    <div id="payment-links" className="w-full rounded-3xl pb-6 relative">
+    <div
+      id="payment-links"
+      className="w-full rounded-3xl pb-6 relative overflow-hidden"
+    >
       <motion.div
         initial={{
           opacity: isBackValue.isBack ? 0 : 1,
@@ -73,14 +77,18 @@ export default function PaymentLinksDashboard() {
         className="w-full flex items-center justify-between px-6 py-6 relative"
       >
         <p className="text-xl">Payment Links</p>
-        <button className="bg-purply-50 rounded-full px-3 py-2 text-purply">
+        <Button
+          onClick={() => {
+            navigate("/payment-links");
+          }}
+          className="bg-purply-50 rounded-full px-4 text-purply h-10 flex items-center"
+        >
           See More
-        </button>
+        </Button>
       </motion.div>
       <div className="w-full flex flex-col px-6">
-        {paymentLinks.map((link, idx) => {
+        {paymentLinks.slice(0, 4).map((link, idx) => {
           const bgImage = AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
-
           return (
             <motion.button
               key={idx}
@@ -94,10 +102,9 @@ export default function PaymentLinksDashboard() {
               layoutId={`payment-card-${link.name}-1`}
               transition={{ duration: 0.4 }}
               className={cnm(
-                "relative rounded-2xl h-52 md:h-60 w-full",
+                "relative rounded-2xl h-60 w-full flex items-start",
                 link.colorClassname,
-                idx > 0 && "-mt-36 md:-mt-44",
-                idx >= 4 ? "opacity-0 hidden" : "opacity-100 block"
+                idx > 0 && "-mt-36 md:-mt-44"
               )}
               whileHover={{ rotate: -5, y: -10 }}
               viewport={{ once: true, amount: 0.5 }}
@@ -105,7 +112,7 @@ export default function PaymentLinksDashboard() {
               <img
                 src={bgImage}
                 alt="card-bg"
-                className="absolute w-full h-full object-cover rounded-[24px]"
+                className="absolute w-full h-full object-cover rounded-[24px] inset-0"
               />
 
               <div

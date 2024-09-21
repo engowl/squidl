@@ -1,7 +1,7 @@
 import { Skeleton } from "@nextui-org/react";
 import axios from "axios";
 import dayjs from "dayjs";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Tooltip,
   ResponsiveContainer,
@@ -13,10 +13,56 @@ import {
 } from "recharts";
 import useSWR from "swr";
 
-const GRID_SIZE = 7;
+const GRID_SIZE = 8;
 const CHART_HEIGHT = 350;
 
+const interpolateData = (data, gridHeight) => {
+  const interpolated = [];
+
+  for (let i = 0; i < data.length - 1; i++) {
+    const current = data[i];
+    const next = data[i + 1];
+
+    // Add the current data point
+    interpolated.push(current);
+
+    const deltaY = next.y - current.y;
+
+    // Fill vertical gaps if deltaY is greater than 1
+    if (Math.abs(deltaY) > 1) {
+      const steps = Math.abs(deltaY); // Number of steps to interpolate between points
+      for (let j = 1; j <= steps; j++) {
+        const interpolatedY = current.y + (deltaY / Math.abs(deltaY)) * j; // Interpolate Y
+        interpolated.push({
+          x: current.x, // Keep X constant
+          y: interpolatedY,
+          usd: current.usd + (next.usd - current.usd) * (j / steps), // Interpolate USD value
+          dates: [...current.dates], // Keep the same date
+        });
+      }
+    }
+  }
+
+  // Add the last data point
+  interpolated.push(data[data.length - 1]);
+  return interpolated;
+};
+
 export default function BalanceChart() {
+  const chartContainerRef = useRef(null); // To get the actual width of the chart
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (chartContainerRef.current) {
+        setContainerWidth(chartContainerRef.current.offsetWidth);
+      }
+    };
+    window.addEventListener("resize", updateWidth);
+    updateWidth();
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
   const { data: chartData, isLoading } = useSWR(
     "/stealth-address/chart/0x278A2d5B5C8696882d1D2002cE107efc74704ECf?chainIds=1,137",
     async (url) => {
@@ -30,54 +76,70 @@ export default function BalanceChart() {
   );
 
   const { pixelData, gridHeight } = useMemo(() => {
-    if (!chartData || chartData.length === 0)
+    if (!chartData || chartData.length === 0 || containerWidth === 0)
       return { pixelData: [], gridHeight: 0 };
 
-    const gridWidth = chartData.length;
+    const gridWidth = Math.floor(containerWidth / GRID_SIZE); // Dynamically calculate gridWidth
     const gridHeight = Math.floor(CHART_HEIGHT / GRID_SIZE);
 
-    // Binning data into grid cells
-    const binnedData = [];
-    const binSize = Math.ceil(chartData.length / gridWidth);
+    // Cut data to fit the total number of grid columns, no averaging, just map each data point directly to the grid
+    const stepSize = Math.floor(chartData.length / gridWidth); // Step size to match data points with grid columns
+    const slicedData = [];
 
     for (let i = 0; i < gridWidth; i++) {
-      const binStart = i * binSize;
-      const binEnd = binStart + binSize;
-      const binData = chartData.slice(binStart, binEnd);
-      const avgUsd =
-        binData.reduce((sum, d) => sum + d.usd, 0) / binData.length || 0;
-
-      binnedData.push({
-        x: i,
-        usd: avgUsd,
-        dates: binData.map((d) => d.date),
-      });
+      const dataIndex = i * stepSize;
+      if (chartData[dataIndex]) {
+        slicedData.push({
+          x: i,
+          usd: chartData[dataIndex].usd,
+          dates: [chartData[dataIndex].date],
+        });
+      }
     }
 
-    const maxUsd = Math.max(...binnedData.map((d) => d.usd));
-    const minUsd = Math.min(...binnedData.map((d) => d.usd));
-    const range = maxUsd - minUsd || 1; // Prevent division by zero
+    const maxUsd = Math.max(...slicedData.map((d) => d.usd));
+    const minUsd = Math.min(...slicedData.map((d) => d.usd));
+    const range = maxUsd - minUsd || 1;
 
-    const pixelData = binnedData.map((point) => {
+    const pixelData = slicedData.map((point) => {
       const normalizedValue = (point.usd - minUsd) / range;
       const yGridPos = Math.round((gridHeight - 1) * (1 - normalizedValue));
+
       return {
-        x: point.x,
+        x: point.x, // Evenly distributed X values
         y: yGridPos,
         usd: point.usd,
         dates: point.dates,
       };
     });
 
-    return { pixelData, gridHeight };
-  }, [chartData]);
+    // Apply interpolation to fill vertical gaps only (not horizontal)
+    const interpolatedPixelData = interpolateData(pixelData, gridHeight);
+
+    return { pixelData: interpolatedPixelData, gridHeight };
+  }, [chartData, containerWidth]);
+
+  console.log({ chartData });
+
+  const lowestPoints = useMemo(() => {
+    const lowestPointsMap = {};
+
+    // Find the lowest point in each column
+    pixelData.forEach((point) => {
+      if (!lowestPointsMap[point.x] || point.y > lowestPointsMap[point.x].y) {
+        lowestPointsMap[point.x] = point;
+      }
+    });
+
+    return Object.values(lowestPointsMap);
+  }, [pixelData]);
 
   if (isLoading) {
     return <Skeleton className="bg-neutral-100 w-full h-72" />;
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={chartContainerRef} className="relative w-full h-full">
       <div
         style={{
           mask: `linear-gradient(0deg, transparent, #000 20%, #000 80%, transparent 100%)`,
@@ -103,6 +165,28 @@ export default function BalanceChart() {
                 <stop offset="0%" stopColor="#9b5de5" stopOpacity={0.4} />
                 <stop offset="100%" stopColor="#9b5de5" stopOpacity={0} />
               </linearGradient>
+              <filter
+                id="smoothGlow"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
+                {/* Gaussian blur for the glow */}
+                <feGaussianBlur stdDeviation="6" result="coloredGlow" />
+                {/* Subtle drop shadow */}
+                <feDropShadow
+                  dx="2"
+                  dy="2"
+                  stdDeviation="3"
+                  floodColor="#000"
+                  floodOpacity="0.2"
+                />
+                <feMerge>
+                  <feMergeNode in="coloredGlow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
             {/* Background Grid */}
             <rect
@@ -130,20 +214,16 @@ export default function BalanceChart() {
             />
             <Tooltip content={<CustomTooltip />} />
             {/* Scatter Pixels with Extended Rectangles */}
+
             <Scatter
               data={pixelData}
               shape={(props) => {
                 const { cx, cy, payload } = props;
-                const size = GRID_SIZE - 2;
+                const size = GRID_SIZE - 3;
                 const x = Math.floor(cx / GRID_SIZE) * GRID_SIZE;
                 const y = Math.floor(cy / GRID_SIZE) * GRID_SIZE;
 
-                // Number of grid cells from current y position to bottom
-                const cellsToBottom = gridHeight - payload.y - 1;
-
                 const rectangles = [];
-
-                // Draw the main scatter rectangle with glow effect
                 rectangles.push(
                   <Rectangle
                     key={`${payload.x}-${payload.y}-main`}
@@ -154,7 +234,6 @@ export default function BalanceChart() {
                     fill="#9b5de5"
                     stroke="none"
                     fillOpacity={1}
-                    style={{ filter: "url(#glow)" }}
                   />
                 );
 

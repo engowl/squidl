@@ -177,12 +177,12 @@ export default function AliasDetail() {
         }}
       >
         <div className="flex gap-4 items-center w-full">
-          <Button className="h-14 bg-[#19191B] w-full rounded-[42px] font-bold">
+          <Button className="h-14 bg-[#19191B] w-full rounded-[42px] font-bold text-white">
             Share
           </Button>
           <Button
             onClick={() => navigate("/alias/transfer")}
-            className="h-14 bg-[#19191B] w-full rounded-[42px] font-bold"
+            className="h-14 bg-[#19191B] w-full rounded-[42px] font-bold text-white"
           >
             Transfer
           </Button>
