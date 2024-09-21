@@ -40,11 +40,9 @@ export default function AliasDetail() {
     >
       <motion.div
         initial={{
-          y: "2rem",
           opacity: 0,
         }}
         animate={{
-          y: "0",
           opacity: 1,
           transition: {
             duration: 0.6,
@@ -71,7 +69,7 @@ export default function AliasDetail() {
           onClick={() => {
             setBack({
               isBack: true,
-              id: layoutId,
+              layoutId,
             });
             navigate("/");
           }}

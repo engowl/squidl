@@ -15,14 +15,16 @@ export default function Dashboard() {
     });
   }, []);
 
-  const isBack = location.state?.isBack || false;
+  const isBackValue = useAtomValue(isBackAtom);
 
   useEffect(() => {
-    const paymentLinks = document.querySelector("#payment-links");
-    paymentLinks.scrollIntoView({
-      behavior: "instant",
-    });
-  }, []);
+    if (isBackValue.isBack) {
+      const paymentLinks = document.querySelector("#payment-links");
+      paymentLinks.scrollIntoView({
+        behavior: "instant",
+      });
+    }
+  }, [isBackValue.isBack]);
   return (
     <motion.div
       layoutScroll
@@ -156,6 +158,8 @@ import {
   Area,
 } from "recharts";
 import { motion } from "framer-motion";
+import { useAtomValue } from "jotai";
+import { isBackAtom } from "../../../store/payment-card-store";
 
 const data = [
   { name: "Page A", uv: 400 },
