@@ -6,6 +6,8 @@ import PlainLayout from "./layouts/PlainLayout.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
 import { AliasDetailPage } from "./pages/AliasDetailPage.jsx";
 import TransferPage from "./pages/TransferPage.jsx";
+import PaymentLinksPage from "./pages/PaymentLinksPage.jsx";
+import TransactionsPage from "./pages/TransactionsPage.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -18,7 +20,7 @@ export const router = createBrowserRouter([
         element: <IndexPage />,
       },
       {
-        path: "/:alias/detail",
+        path: "/:alias/detail/:parent",
         element: <AliasDetailPage />,
         children: [
           {
@@ -30,6 +32,14 @@ export const router = createBrowserRouter([
       {
         path: "/:alias/transfer",
         element: <TransferPage />,
+      },
+      {
+        path: "/payment-links",
+        element: <PaymentLinksPage />,
+      },
+      {
+        path: "/transactions",
+        element: <TransactionsPage />,
       },
     ],
   },

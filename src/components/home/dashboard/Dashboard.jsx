@@ -5,16 +5,18 @@ import { cnm } from "../../../utils/style";
 import { Button } from "@nextui-org/react";
 import QrCodeIcon from "../../../assets/icons/qr-code.svg?react";
 import CopyIcon from "../../../assets/icons/copy.svg?react";
-import PaymentLinks from "./PaymentLinks";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import BalanceChart from "./BalanceChart";
 import { useAtomValue } from "jotai";
 import { isBackAtom } from "../../../store/payment-card-store";
-import RadarGrid from "../../../assets/radar-bg.svg?react";
 import { Fingerprint, Handshake, Lock } from "lucide-react";
+import CreateLinkDialog from "../../dialogs/CreateLinkDialog.jsx";
+import QrDialog from "../../dialogs/QrDialog.jsx";
+import PaymentLinksDashboard from "./PaymentLinksDashboard.jsx";
 
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();
+  const [openQr, setOpenQr] = useState(false);
 
   useEffect(() => {
     squidlAPI.get("/auth/me").then(({ data }) => {
@@ -34,16 +36,34 @@ export default function Dashboard() {
   }, [isBackValue.isBack]);
 
   return (
-    <motion.div
-      layoutScroll
-      className="w-full h-screen flex flex-col items-center overflow-y-auto"
-    >
-      <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
-        <ReceiveCard />
-        <TotalBalance />
-        <PaymentLinks />
-      </div>
-    </motion.div>
+    <>
+      <CreateLinkDialog
+        onSuccess={() => {
+          // Do refresh
+        }}
+      />
+
+      <QrDialog
+        open={openQr}
+        setOpen={setOpenQr}
+        qrUrl={
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png"
+        }
+      />
+
+      <motion.div
+        layoutScroll
+        className="w-full h-screen flex flex-col items-center overflow-y-auto"
+      >
+        <div className="flex flex-col items-center py-20 w-full">
+          <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
+            <ReceiveCard setOpenQr={setOpenQr} />
+            <TotalBalance />
+            <PaymentLinksDashboard />
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 }
 

@@ -15,6 +15,9 @@ export default function AliasDetail() {
   const navigate = useNavigate();
   const setBack = useSetAtom(isBackAtom);
   const userWallets = useUserWallets();
+  const { alias, parent } = useParams();
+
+  const layoutId = `payment-card-${alias}-${parent}`;
 
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
@@ -24,12 +27,6 @@ export default function AliasDetail() {
     });
     navigator.clipboard.writeText(text);
   };
-
-  const { alias } = useParams();
-
-  const layoutId = location.state?.layoutId || `payment-card-${alias}`;
-
-  console.log({ layoutId });
 
   useEffect(() => {
     window.scrollTo(0, 0); // Reset scroll to top
@@ -74,7 +71,7 @@ export default function AliasDetail() {
               isBack: true,
               layoutId,
             });
-            navigate("/");
+            navigate(-1);
           }}
           className="flex items-center gap-1 bg-white rounded-[21px] h-10 pl-3 pr-4"
         >
@@ -98,7 +95,7 @@ export default function AliasDetail() {
         <img
           src="/assets/card.png"
           alt="card-placeholder"
-          className="absolute w-full h-full object-cover rounded-[24px]"
+          className="absolute w-full h-full object-cover rounded-2xl"
         />
 
         <div className="absolute right-5 top-5 size-12 rounded-full overflow-hidden">

@@ -1,3 +1,5 @@
+import Nounsies from "../shared/Nounsies.jsx";
+
 export default function TxItem({
   tokenImg,
   chainImg,
@@ -5,11 +7,24 @@ export default function TxItem({
   subtitle,
   value,
   subValue,
+  isNounsies = false,
+  addressNounsies,
 }) {
   return (
     <div className="flex gap-4 w-full py-3">
       <div className="relative size-12">
-        <img src={tokenImg} alt="ic" className="object-contain w-full h-full" />
+        {isNounsies ? (
+          <div className="size-12 rounded-full overflow-hidden relative">
+            <Nounsies address={addressNounsies} />
+          </div>
+        ) : (
+          <img
+            src={tokenImg}
+            alt="ic"
+            className="object-contain w-full h-full"
+          />
+        )}
+
         <img
           src={chainImg}
           alt="ic"
