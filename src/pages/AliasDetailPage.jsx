@@ -1,4 +1,4 @@
-import AliasDetail from "../components/home/AliasDetail.jsx";
+import AliasDetail from "../components/alias/AliasDetail.jsx";
 
 export function AliasDetailPage() {
   return (

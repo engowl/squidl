@@ -1,10 +1,13 @@
 import { Button } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
-import TxItem from "../shared/TxItem.jsx";
+import TxItem from "./TxItem.jsx";
 import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function AliasDetail() {
+  const navigate = useNavigate();
+
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
       id: "copy",
@@ -73,7 +76,10 @@ export default function AliasDetail() {
         <Button className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold">
           Share
         </Button>
-        <Button className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold">
+        <Button
+          onClick={() => navigate("/alias/transfer")}
+          className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold"
+        >
           Transfer
         </Button>
       </div>
