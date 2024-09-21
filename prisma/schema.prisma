@@ -44,8 +44,8 @@ model User {
 model UserAlias {
   id String @id @default(cuid())
 
-  key    Int    @unique
-  
+  key Int @unique
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
@@ -64,8 +64,12 @@ model StealthAddress {
   aliasId String
   alias   UserAlias @relation(fields: [aliasId], references: [id], onDelete: Cascade)
 
-  address       String  @unique
+  address      String @unique
+  ephemeralPub String
+  viewHint     String
+
   isSmartWallet Boolean @default(false)
+  isTransacted  Boolean @default(false)
 
   transactions Transaction[]
 

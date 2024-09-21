@@ -10,14 +10,23 @@ export const CHAINS = {
       imageUrl: "https://filebucketz.sgp1.cdn.digitaloceanspaces.com/misc/chains/ethereum.svg"
     },
     {
-      id: 137,
-      name: "Polygon Mainnet",
-      chainlistUrl: "https://chainlist.org/chain/137",
-      rpcUrl: "https://polygon-mainnet.infura.io/v3/0be86a45a4c3431398571a7c81165708",
-      nativeToken: "MATIC",
-      blockExplorerUrl: "https://polygonscan.com",
-      imageUrl: "https://filebucketz.sgp1.cdn.digitaloceanspaces.com/misc/chains/matic.svg"
+      id: 56,
+      name: 'BNB Smart Chain Mainnet',
+      chainlistUrl: 'https://chainlist.org/chain/56',
+      rpcUrl: "https://bsc-mainnet.infura.io/v3/0be86a45a4c3431398571a7c81165708",
+      nativeToken: 'BNB',
+      blockExplorerUrl: 'https://bscscan.com',
+      imageUrl: 'https://filebucketz.sgp1.cdn.digitaloceanspaces.com/misc/chains/bsc.svg'
     },
+    // {
+    //   id: 137,
+    //   name: "Polygon Mainnet",
+    //   chainlistUrl: "https://chainlist.org/chain/137",
+    //   rpcUrl: "https://polygon-mainnet.infura.io/v3/0be86a45a4c3431398571a7c81165708",
+    //   nativeToken: "MATIC",
+    //   blockExplorerUrl: "https://polygonscan.com",
+    //   imageUrl: "https://filebucketz.sgp1.cdn.digitaloceanspaces.com/misc/chains/matic.svg"
+    // },
     {
       id: 747,
       name: "EVM on Flow",

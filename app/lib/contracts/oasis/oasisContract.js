@@ -55,7 +55,7 @@ export const stealthSignerGenerateStealthAddress = async ({
   return data;
 }
 
-stealthSignerGenerateStealthAddress({
-  chainId: 23295,
-  userId: "0x8Bb2E0Ec042918bbE00404C3b606EB7a081D1cfc"
-});
+// stealthSignerGenerateStealthAddress({
+//   chainId: 23295,
+//   userId: "0x8Bb2E0Ec042918bbE00404C3b606EB7a081D1cfc"
+// });

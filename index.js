@@ -10,6 +10,7 @@ import { stealthAddressRoutes } from "./app/routes/stealth-address/index.js";
 import { priceWorker } from "./app/workers/priceWorkers.js";
 import { userRoutes } from "./app/routes/user/userRoutes.js";
 import { stealthSignerGenerateStealthAddress } from "./app/lib/contracts/oasis/oasisContract.js";
+import { oneInchGetGeneralValue, oneInchGetValueChart } from "./app/routes/stealth-address/helpers/oneInchHelpers.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,11 @@ fastify.register(userRoutes, {
 
 /* --------------------------------- Workers -------------------------------- */
 // fastify.register(priceWorker);
+
+oneInchGetGeneralValue({
+  chainIds: [1, 137],
+  addresses: ['0x278A2d5B5C8696882d1D2002cE107efc74704ECf']
+})
 
 const start = async () => {
   try {

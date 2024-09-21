@@ -19,8 +19,48 @@ export const stealthAddressRoutes = (app, _, done) => {
   app.get('/aliases', {
     preHandler: [authMiddleware]
   }, async (req, res) => {
-    // Fetch aliases from your database or service
-    return []
+    try {
+      const { address } = getUserJwtData(req.user);
+      const user = await prismaClient.user.findFirst({
+        where: {
+          address: address
+        },
+        select: {
+          id: true,
+        }
+      })
+
+      if (!user) {
+        return res.status(400).send({ message: "User not found" });
+      }
+      const aliases = await prismaClient.userAlias.findMany({
+        where: {
+          user: {
+            id: user.id
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+
+      // Add balanceUsd to each alias
+      for (let i = 0; i < aliases.length; i++) {
+        // Random from $100 to $10000, max 2 decimal places
+        // TODO: Fetch the actual balance for each alias
+        aliases[i].balanceUsd = Math.floor(Math.random() * 509900 + 100) / 100;
+
+        // To fetch the overall balance, it will iterate each aliases, and using 1inch Generate Current Value API to get the balance of address collection
+
+      }
+
+      return aliases;
+    } catch (error) {
+      console.error('Error while fetching aliases:', error)
+      return res.status(500).send({
+        message: "Error while fetching aliases"
+      });
+    }
   });
 
   // GET /aliases/:id , to get the detailed information of a certain alias
@@ -116,6 +156,14 @@ export const stealthAddressRoutes = (app, _, done) => {
     }
   });
 
+  // DEVNOTE: Due to time constraints and the complexity of implementing 
+  // a more efficient solution within the limited timeframe of the hackathon, 
+  // we've opted to index all stealth addresses directly in the database for now. 
+  // While this approach is functional, we acknowledge it's not ideal. 
+  // Our original plan was to temporarily track only the most recent stealth address, 
+  // allowing Sapphire’s ROFL (Rollup Optimistic Full-Node Layer) to periodically 
+  // retrieve and verify the data. Eventually, ROFL would serve as the 
+  // Squidl Data Availability Layer, ensuring a more scalable and decentralized data solution.
   app.get('/address/new-address', async (req, res) => {
     try {
       // Detect the full alias, e.g. user.user.squidl.eth, or user.squidl.eth ( [alias].[username].squidl.eth )
@@ -133,7 +181,7 @@ export const stealthAddressRoutes = (app, _, done) => {
 
       const userAlias = await prismaClient.userAlias.findFirst({
         where: {
-          alias: alias || null,
+          alias: alias || '',
           user: {
             username: username
           }
@@ -150,9 +198,28 @@ export const stealthAddressRoutes = (app, _, done) => {
         key: userAlias.key
       })
 
-      return newStealthAddress;
+      // Insert
+      const savedStealthAddress = await prismaClient.stealthAddress.create({
+        select: {
+          address: true,
+        },
+        data: {
+          aliasId: userAlias.id,
+          address: newStealthAddress.stealthAddress,
+          ephemeralPub: newStealthAddress.ephemeralPub,
+          viewHint: newStealthAddress.viewHint,
+          isSmartWallet: false
+        }
+      })
+
+      return savedStealthAddress;
     } catch (error) {
       console.error(error)
+      return res.status(500).send({
+        error: error.message,
+        data: null,
+        message: "error while generating new stealth address"
+      })
     }
   })
 
@@ -184,7 +251,40 @@ export const stealthAddressRoutes = (app, _, done) => {
   app.post('/tx/withdraw', {
     preHandler: [authMiddleware]
   }, async (req, res) => {
-    const { body } = req;
+    const {
+      fullAlias,
+      tokenAddress,
+      chainId,
+      amount,
+      destinationChainId,
+      destinationAddress
+    } = req.body;
+
+    const { address } = getUserJwtData(req.user);
+    const user = await prismaClient.user.findFirst({
+      where: {
+        address: address
+      },
+    })
+
+    if (!user) {
+      return res.status(400).send({ message: "User not found" });
+    }
+
+    const userAlias = await prismaClient.userAlias.findFirst({
+      where: {
+        alias: fullAlias,
+        userId: user.id
+      },
+    })
+
+    // TODO: Get the stealth addresses of the userAlias that have the tokenAddress. Will map it out like { address: stealthAddress, amount: amount, ... }
+
+    // TODO: Based on the addresses balances, will determine which stealth address to use for the withdrawal. For example if the user has 3 stealth addresses, the first one got 1 USDC, the second one got 2 USDC, and the third one got 3 USDC, and the user wants to withdraw 3 USDC, the system will use the third stealth address to withdraw the funds. Starting from the stealth address with the highest balance.
+
+    // TODO: After determined all of which transfer recipient address, the system will generate the transactions for the withdrawal of the funds. This transaction then will be signed one by one (not be shown to the user) and then will be sent to the blockchain.
+
+    //  TODO: After the transactions are sent to the blockchain, the system log the transactions to the database, and then the system will return the transaction hash to the user.
     // Transaction withdrawal logic here
     return { success: true };
   });
