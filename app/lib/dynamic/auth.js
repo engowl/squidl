@@ -20,7 +20,7 @@ export async function verifyDynamicToken(encodedJwt) {
       ignoreExpiration: false,
     });
 
-    console.log({ decodedToken });
+    // console.log({ decodedToken });
 
     return decodedToken;
   } catch (e) {

@@ -88,7 +88,6 @@ export const authRoutes = (app, _, done) => {
 
   app.post("/session", async (req, reply) => {
     const { authToken } = req.body;
-
     await verifyFields(req.body, ["authToken"], reply);
     try {
       const decodedToken = await verifyDynamicToken(authToken);
