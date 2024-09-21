@@ -16,4 +16,4 @@
 ## Learn More About Our Platform
 Explore what we’re building by visiting:
 
-[Excalidraw](https://excalidraw.com/#json=FtV1YyZ2JTzPphmrEw1mG,a_D2Fsds3p8W2OJWlRmk6Q)
+[Sequence Diagram](https://excalidraw.com/#json=FtV1YyZ2JTzPphmrEw1mG,a_D2Fsds3p8W2OJWlRmk6Q)
