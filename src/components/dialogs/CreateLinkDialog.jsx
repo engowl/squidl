@@ -31,6 +31,13 @@ export default function CreateLinkDialog({ onSuccess }) {
       placement="center"
     >
       <ModalContent className="bg-white rounded-4xl p-8 max-w-[562px] flex flex-col items-start relative">
+        <button
+          onClick={() => setOpen(false)}
+          className="absolute right-4 top-4 bg-[#F8F8F8] rounded-full p-3"
+        >
+          <Icons.close classNamet="text-black size-6" />
+        </button>
+
         {/* <StepOne /> */}
         <StepTwo />
       </ModalContent>
