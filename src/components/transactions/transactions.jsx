@@ -1,4 +1,4 @@
-import { shortenId } from "../../utils/FormattingUtils.js";
+import { shortenAddress } from "../../utils/string.js";
 import TxItem from "../alias/TxItem.jsx";
 import { Icons } from "../shared/Icons.jsx";
 
@@ -25,7 +25,7 @@ export default function Transactions() {
           title={"trivial.jane.squidl.me - Deposit"}
           isNounsies
           addressNounsies={"0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f34"}
-          subtitle={`from ${shortenId(
+          subtitle={`from ${shortenAddress(
             "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f34"
           )}`}
           value={"0.512 USDC"}
@@ -38,7 +38,7 @@ export default function Transactions() {
           title={"xx.jane.squidl.me - Deposit"}
           isNounsies
           addressNounsies={"0x02919065a8Ef7A782Bb3D9f3DEFef2F230a4d1f34"}
-          subtitle={`from ${shortenId(
+          subtitle={`from ${shortenAddress(
             "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f32"
           )}`}
           value={"0.512 USDC"}
@@ -51,7 +51,7 @@ export default function Transactions() {
           title={"yy.jane.squidl.me - Deposit"}
           isNounsies
           addressNounsies={"0x02919065a8Ef7A782Bb3D9f3134Fef2FA0a4d1f34"}
-          subtitle={`from ${shortenId(
+          subtitle={`from ${shortenAddress(
             "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f35"
           )}`}
           value={"0.512 USDC"}

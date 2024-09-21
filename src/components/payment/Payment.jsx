@@ -2,12 +2,12 @@ import toast from "react-hot-toast";
 import { Icons } from "../shared/Icons.jsx";
 import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 import { Button } from "@nextui-org/react";
-import { shortenId } from "../../utils/FormattingUtils.js";
 import { QRCode } from "react-qrcode-logo";
 import OnRampDialog from "../dialogs/OnrampDialog.jsx";
 import { useState } from "react";
 import SuccessDialog from "../dialogs/SuccessDialog.jsx";
 import Chains from "../shared/Chains.jsx";
+import { shortenAddress } from "../../utils/string.js";
 
 export default function Payment() {
   const isLoggedIn = useIsLoggedIn();
@@ -111,7 +111,7 @@ export default function Payment() {
           <div className="flex flex-col gap-4 mt-4 items-center justify-center w-full">
             <div className="flex bg-white rounded-[30.5px] gap-4 w-full items-center justify-between">
               <h1 className="text-[#19191B] font-medium px-4 py-3">
-                {shortenId("0x981F692cF970f169b0779BFeaE5737353DE7a0FD")}
+                {shortenAddress("0x981F692cF970f169b0779BFeaE5737353DE7a0FD")}
               </h1>
               <button
                 onClick={() =>

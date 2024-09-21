@@ -1,7 +1,6 @@
 import { Button, Skeleton } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import TxItem from "./TxItem.jsx";
-import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
 import {
   useLoaderData,
@@ -21,6 +20,7 @@ import {
   CARDS_SCHEME,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
 import { cnm } from "../../utils/style.js";
+import { shortenAddress } from "../../utils/string.js";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -161,7 +161,7 @@ export default function AliasDetail() {
               scheme === "1" && "text-black"
             )}
           >
-            $8,888,888.88
+            $0
           </h1>
 
           <div className="absolute left-5 bottom-6 flex items-center justify-between">
@@ -197,7 +197,7 @@ export default function AliasDetail() {
         {loadingAlias || isValidating ? (
           <Skeleton className="flex rounded-full w-20 h-8" />
         ) : (
-          <p className="font-medium text-[#19191B] py-2 px-3">{`${shortenId(
+          <p className="font-medium text-[#19191B] py-2 px-3">{`${shortenAddress(
             aliasAddress
           )}`}</p>
         )}
@@ -287,7 +287,7 @@ export default function AliasDetail() {
               tokenImg={"/assets/eth-logo.png"}
               chainImg={"/assets/eth-logo.png"}
               title={"Ethereum"}
-              subtitle={`from ${shortenId(
+              subtitle={`from ${shortenAddress(
                 "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
               )}`}
               value={"0.512"}
@@ -297,7 +297,7 @@ export default function AliasDetail() {
               tokenImg={"/assets/eth-logo.png"}
               chainImg={"/assets/eth-logo.png"}
               title={"Ethereum"}
-              subtitle={`from ${shortenId(
+              subtitle={`from ${shortenAddress(
                 "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
               )}`}
               value={"0.512"}
@@ -307,7 +307,7 @@ export default function AliasDetail() {
               tokenImg={"/assets/eth-logo.png"}
               chainImg={"/assets/eth-logo.png"}
               title={"Ethereum"}
-              subtitle={`from ${shortenId(
+              subtitle={`from ${shortenAddress(
                 "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
               )}`}
               value={"0.512"}

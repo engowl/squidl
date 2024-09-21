@@ -76,63 +76,23 @@ export default function BalanceChart() {
   );
 
   const { pixelData, gridHeight } = useMemo(() => {
-    if (!chartData || chartData.length === 0 || containerWidth === 0)
-      return { pixelData: [], gridHeight: 0 };
-
-    const gridWidth = Math.floor(containerWidth / GRID_SIZE); // Dynamically calculate gridWidth
     const gridHeight = Math.floor(CHART_HEIGHT / GRID_SIZE);
 
-    // Cut data to fit the total number of grid columns, no averaging, just map each data point directly to the grid
-    const stepSize = Math.floor(chartData.length / gridWidth); // Step size to match data points with grid columns
-    const slicedData = [];
-
-    for (let i = 0; i < gridWidth; i++) {
-      const dataIndex = i * stepSize;
-      if (chartData[dataIndex]) {
-        slicedData.push({
-          x: i,
-          usd: chartData[dataIndex].usd,
-          dates: [chartData[dataIndex].date],
-        });
-      }
-    }
-
-    const maxUsd = Math.max(...slicedData.map((d) => d.usd));
-    const minUsd = Math.min(...slicedData.map((d) => d.usd));
-    const range = maxUsd - minUsd || 1;
-
-    const pixelData = slicedData.map((point) => {
-      const normalizedValue = (point.usd - minUsd) / range;
-      const yGridPos = Math.round((gridHeight - 1) * (1 - normalizedValue));
-
+    const pixelData = [...Array.from({ length: 57 })].map((point, idx) => {
       return {
-        x: point.x, // Evenly distributed X values
-        y: yGridPos,
-        usd: point.usd,
-        dates: point.dates,
+        x: idx + 2,
+        y: gridHeight + 0,
+        usd: 0,
+        dates: "",
       };
     });
 
     // Apply interpolation to fill vertical gaps only (not horizontal)
-    const interpolatedPixelData = interpolateData(pixelData, gridHeight);
 
-    return { pixelData: interpolatedPixelData, gridHeight };
-  }, [chartData, containerWidth]);
+    return { pixelData, gridHeight };
+  }, [containerWidth]);
 
-  console.log({ chartData });
-
-  const lowestPoints = useMemo(() => {
-    const lowestPointsMap = {};
-
-    // Find the lowest point in each column
-    pixelData.forEach((point) => {
-      if (!lowestPointsMap[point.x] || point.y > lowestPointsMap[point.x].y) {
-        lowestPointsMap[point.x] = point;
-      }
-    });
-
-    return Object.values(lowestPointsMap);
-  }, [pixelData]);
+  console.log({ pixelData });
 
   if (isLoading) {
     return (
@@ -152,7 +112,11 @@ export default function BalanceChart() {
         }}
         className="w-full h-full relative"
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          className="scale-[1.2] -translate-y-5"
+        >
           <ScatterChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
             <defs>
               <pattern
@@ -223,11 +187,15 @@ export default function BalanceChart() {
 
             <Scatter
               data={pixelData}
+              className="-translate-x-10"
               shape={(props) => {
                 const { cx, cy, payload } = props;
-                const size = GRID_SIZE - 3;
+                console.log({ cx, cy, payload });
+                const size = GRID_SIZE - 2;
                 const x = Math.floor(cx / GRID_SIZE) * GRID_SIZE;
                 const y = Math.floor(cy / GRID_SIZE) * GRID_SIZE;
+
+                console.log({ x, y });
 
                 const rectangles = [];
                 rectangles.push(
@@ -237,9 +205,8 @@ export default function BalanceChart() {
                     y={y}
                     width={size}
                     height={size}
-                    fill="#9b5de5"
+                    fill="#7b61ff"
                     stroke="none"
-                    fillOpacity={1}
                   />
                 );
 
@@ -248,6 +215,7 @@ export default function BalanceChart() {
             />
           </ScatterChart>
         </ResponsiveContainer>
+        <div className="w-full bottom-0 absolute bg-gradient-to-t from-purply-500/15 to-purply/0 h-[150px]"></div>
       </div>
     </div>
   );

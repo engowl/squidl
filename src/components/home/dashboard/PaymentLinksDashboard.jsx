@@ -7,6 +7,7 @@ import { Button, Skeleton } from "@nextui-org/react";
 import useSWR from "swr";
 import { squidlAPI } from "../../../api/squidl.js";
 import { isCreateLinkDialogAtom } from "../../../store/dialog-store.js";
+import SquidLogo from "../../../assets/squidl-logo.svg?react";
 
 export const paymentLinks = [
   {
@@ -156,16 +157,31 @@ export default function PaymentLinksDashboard({ user }) {
                   </div>
 
                   <div className="absolute left-5 bottom-6 flex items-center justify-between">
-                    <h1 className="text-[#484B4E] font-bold text-2xl">
+                    <h1
+                      className={cnm(
+                        "font-bold text-2xl",
+                        bgImage === "/assets/card-2.png"
+                          ? "text-black"
+                          : "text-white"
+                      )}
+                    >
                       SQUIDL
                     </h1>
                   </div>
 
                   <div className="absolute right-5 bottom-6 flex items-center justify-between">
-                    <img
+                    {/* <img
                       src="/assets/squidl-logo-only.png"
                       alt="logo"
-                      className="object-contain w-12 h-16"
+                      className="object-contain w-12 h-16 invert"
+                    /> */}
+                    <SquidLogo
+                      className={cnm(
+                        "w-12 ",
+                        bgImage === "/assets/card-2.png"
+                          ? "fill-black"
+                          : "fill-white"
+                      )}
                     />
                   </div>
                 </motion.button>

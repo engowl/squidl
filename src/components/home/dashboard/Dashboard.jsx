@@ -19,6 +19,7 @@ import { Icons } from "../../shared/Icons.jsx";
 import crypto from "crypto";
 import { sleep } from "../../../utils/process.js";
 import { useNavigate } from "react-router-dom";
+import { mainBalance, privateBalance } from "../../../store/balance-store.js";
 
 function generateRandomEthAddress() {
   // Generate a random 20-byte hexadecimal string (Ethereum address length is 40 hex characters or 20 bytes)
@@ -141,7 +142,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
         <div className="bg-purply-800 rounded-full flex relative items-center font-medium">
           <div
             className={cnm(
-              "w-24 h-10 bg-purply-600 h-full absolute left-0 rounded-full transition-transform ease-in-out",
+              "w-24 h-10 bg-purply-600 absolute left-0 rounded-full transition-transform ease-in-out",
               mode === "ens" ? "translate-x-0" : "translate-x-full"
             )}
           ></div>
@@ -282,6 +283,8 @@ function TotalBalance() {
 
 function BalanceMode({ mode }) {
   const navigate = useNavigate();
+  const totalMainBalance = useAtomValue(mainBalance);
+  const totalPrivateBalance = useAtomValue(privateBalance);
 
   function onNavigate() {
     if (mode === "available") {
@@ -334,7 +337,10 @@ function BalanceMode({ mode }) {
             "left-6 top-2"
           )}
         >
-          $100,000
+          $
+          {mode === "private"
+            ? totalPrivateBalance.toFixed(2).toLocaleString("en-US").to
+            : totalMainBalance.toFixed(2).toLocaleString("en-US")}
         </p>
       </div>
       <div className="mt-4 w-full flex items-center gap-2 px-6 py-6 text-lg">
@@ -351,7 +357,11 @@ function BalanceMode({ mode }) {
         </Button>
         <Button
           onClick={() => {
-            navigate("/james.squidl.me/transfer");
+            navigate(
+              `/james.squidl.me/transfer?type=${
+                mode === "private" ? "private" : "main"
+              }`
+            );
           }}
           className={cnm(
             " flex-1 rounded-full h-14",

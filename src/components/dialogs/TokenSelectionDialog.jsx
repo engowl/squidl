@@ -1,14 +1,20 @@
 import { Button, Modal, ModalContent } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import { motion } from "framer-motion";
+import { cnm } from "../../utils/style.js";
 
 export default function TokenSelectionDialog({
   open,
   setOpen,
   tokens,
   selectedToken,
+  setSelectedToken,
+  isPrivate,
   onSelectToken,
+  balances,
+  setAmount,
 }) {
+  console.log({ balances, tokens });
   return (
     <motion.div
       initial={{ height: 0 }}
@@ -37,78 +43,50 @@ export default function TokenSelectionDialog({
           />
         </div>
         <div className="flex flex-col w-full mt-4 overflow-y-auto flex-grow min-h-0 px-6 pb-6">
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            isPrivate={true}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <Token
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
+          {tokens.map((token, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setSelectedToken(token);
+                setOpen(false);
+                setAmount(
+                  balances.find(
+                    (balance) =>
+                      balance.chainName === token.chainName &&
+                      balance.tokenName === token.tokenName
+                  )?.balance
+                );
+              }}
+              className={cnm(
+                "px-4 py-2 ",
+                selectedToken &&
+                  selectedToken.id === token.id &&
+                  "bg-neutral-100 rounded-xl"
+              )}
+            >
+              <Token
+                tokenImg={token.tokenLogoUrl}
+                chainImg={token.chainLogoUrl}
+                title={token.tokenName}
+                isPrivate={isPrivate}
+                subtitle={token.chainName}
+                value={
+                  balances.find(
+                    (balance) =>
+                      balance.chainName === token.chainName &&
+                      balance.tokenName === token.tokenName
+                  )?.balance
+                }
+                subValue={`$${
+                  balances.find(
+                    (balance) =>
+                      balance.chainName === token.chainName &&
+                      balance.tokenName === token.tokenName
+                  )?.balance
+                }`}
+              />
+            </button>
+          ))}
         </div>
       </div>
     </motion.div>
@@ -137,7 +115,7 @@ function Token({
 
       <div className="flex items-start justify-between w-full">
         <div className="flex gap-3">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
             <h1 className="font-bold text-[#161618]">{title}</h1>
             {subtitle && (
               <p className="font-medium text-[#A1A1A3] text-sm">{subtitle}</p>
