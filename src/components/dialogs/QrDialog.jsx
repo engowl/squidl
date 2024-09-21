@@ -1,6 +1,7 @@
 import { Button, Modal, ModalContent } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import toast from "react-hot-toast";
+import Chains from "../shared/Chains.jsx";
 
 export default function QrDialog({ open, setOpen, qrUrl }) {
   const onCopy = (text) => {
@@ -103,16 +104,7 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <p className="text-[#A1A1A3] font-sm">Supported Chain</p>
-
-          <div className="flex gap-1 items-center justify-center">
-            <div className="size-6 rounded-full bg-[#A1A1A3]"></div>
-            <div className="size-6 rounded-full bg-[#A1A1A3]"></div>
-            <div className="size-6 rounded-full bg-[#A1A1A3]"></div>
-            <div className="size-6 rounded-full bg-[#A1A1A3]"></div>
-          </div>
-        </div>
+        <Chains />
 
         <div className="flex w-full items-center gap-4 mt-2">
           <Button
