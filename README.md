@@ -13,7 +13,7 @@
 - 📊 **Unified Dashboard**: Track and manage all transactions easily in one place.
 - 🌉 **Bridge to Oasis Sapphire Network**: Optionally bridge funds to the **Oasis Sapphire network** for even deeper privacy.
 
-Learn More About Our Platform
+## Learn More About Our Platform
 Explore what we’re building by visiting:
 
 [Excalidraw](https://excalidraw.com/#json=FtV1YyZ2JTzPphmrEw1mG,a_D2Fsds3p8W2OJWlRmk6Q)
