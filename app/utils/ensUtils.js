@@ -100,7 +100,7 @@ export async function handleQuery({
       if (key === 'url') {
         res = nameData?.texts?.url ?? 'https://test.com'; // Resolve the 'url' key, defaulting to 'https://test.com'
       } else {
-        res = nameData?.texts?.[key] ?? ''; // Handle other text keys
+        res = nameData?.texts?.[key] ?? 'testing'; // Handle other text keys
       }
       break;
     }

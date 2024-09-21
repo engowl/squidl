@@ -111,13 +111,10 @@ export const stealthAddressRoutes = (app, _, done) => {
       console.log('decodedResolveCall', decodedResolveCall)
 
       const name = dnsDecodeName(decodedResolveCall.args[0]);
-      console.log('name:', name)
+      console.log('name:', name) // e.g. user.squidl.eth
 
-      // it will be [...].squidl.eth , read the [...] , so the 3rd element, if they try to become [...].[...].squidl.eth, it will be still be the 3rd element from the last
       const alias = name.split('.')[name.split('.').length - 3];
       console.log('alias:', alias)
-
-      const resolvedAddress = ethers.Wallet.createRandom().address;
 
       const { result, ttl } = await handleQuery({
         dnsEncodedName: decodedResolveCall.args[0],
@@ -172,7 +169,7 @@ export const stealthAddressRoutes = (app, _, done) => {
       });
       console.log('Recovered signer address:', recoveredAddress);
 
-      return encodedResponse;
+      return { data: encodedResponse }
     } catch (error) {
       console.error(error)
       return {
