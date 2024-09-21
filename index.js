@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({
-  logger: false,
+  logger: true
 });
 
 fastify.register(FastifyCors, {
