@@ -3,8 +3,9 @@ import { Icons } from "../shared/Icons.jsx";
 import TxItem from "./TxItem.jsx";
 import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -17,6 +18,14 @@ export default function AliasDetail() {
     navigator.clipboard.writeText(text);
   };
 
+  const { alias } = useParams();
+
+  const layoutId = location.state?.layoutId || `payment-card-${alias}`;
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // Reset scroll to top
+  }, []);
+
   return (
     <div
       className={
@@ -24,7 +33,10 @@ export default function AliasDetail() {
       }
     >
       <div className="flex items-center justify-between w-full">
-        <Button className="flex items-center gap-1 bg-white rounded-[21px] h-10 pl-3 pr-4">
+        <Button
+          onClick={() => navigate(-1, { replace: true })}
+          className="flex items-center gap-1 bg-white rounded-[21px] h-10 pl-3 pr-4"
+        >
           <Icons.back className="text-black" />
           <p className="font-bold text-sm text-[#19191B]">Back</p>
         </Button>
@@ -38,7 +50,8 @@ export default function AliasDetail() {
 
       <motion.div
         layout
-        layoutId="payment-card"
+        layoutId={layoutId}
+        transition={{ duration: 0.4 }}
         className="relative w-full h-full"
       >
         <img
@@ -76,90 +89,105 @@ export default function AliasDetail() {
         </div>
       </motion.div>
 
-      <div className="flex gap-4 items-center w-full">
-        <Button className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold">
-          Share
-        </Button>
-        <Button
-          onClick={() => navigate("/alias/transfer")}
-          className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold"
-        >
-          Transfer
-        </Button>
-      </div>
-
-      {/* Assets */}
-
-      <div className="flex flex-col w-full gap-3">
-        <h1 className="font-bold text-[#19191B] text-lg">Assets</h1>
-
-        <div className="flex flex-col w-full">
-          <TxItem
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <TxItem
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
-
-          <TxItem
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={"Ethereum"}
-            value={"0.512"}
-            subValue={"$124.29"}
-          />
+      <motion.div
+        className="flex flex-col gap-6 w-full"
+        initial={{
+          y: "2rem",
+          opacity: 0,
+        }}
+        animate={{
+          y: "0",
+          opacity: 1,
+          transition: {
+            duration: 0.6,
+          },
+        }}
+      >
+        <div className="flex gap-4 items-center w-full">
+          <Button className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold">
+            Share
+          </Button>
+          <Button
+            onClick={() => navigate("/alias/transfer")}
+            className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold"
+          >
+            Transfer
+          </Button>
         </div>
-      </div>
 
-      {/* Transactions */}
+        {/* Assets */}
 
-      <div className="flex flex-col w-full gap-3">
-        <h1 className="font-bold text-[#19191B] text-lg">Transactions</h1>
-        <p className="text-[#A1A1A3] font-medium text-sm mt-1">09/20/2024</p>
-        <div className="flex flex-col w-full">
-          <TxItem
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={`from ${shortenId(
-              "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
-            )}`}
-            value={"0.512"}
-          />
+        <div className="flex flex-col w-full gap-3">
+          <h1 className="font-bold text-[#19191B] text-lg">Assets</h1>
 
-          <TxItem
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={`from ${shortenId(
-              "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
-            )}`}
-            value={"0.512"}
-          />
+          <div className="flex flex-col w-full">
+            <TxItem
+              tokenImg={"/assets/eth-logo.png"}
+              chainImg={"/assets/eth-logo.png"}
+              title={"Ethereum"}
+              subtitle={"Ethereum"}
+              value={"0.512"}
+              subValue={"$124.29"}
+            />
 
-          <TxItem
-            tokenImg={"/assets/eth-logo.png"}
-            chainImg={"/assets/eth-logo.png"}
-            title={"Ethereum"}
-            subtitle={`from ${shortenId(
-              "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
-            )}`}
-            value={"0.512"}
-          />
+            <TxItem
+              tokenImg={"/assets/eth-logo.png"}
+              chainImg={"/assets/eth-logo.png"}
+              title={"Ethereum"}
+              subtitle={"Ethereum"}
+              value={"0.512"}
+              subValue={"$124.29"}
+            />
+
+            <TxItem
+              tokenImg={"/assets/eth-logo.png"}
+              chainImg={"/assets/eth-logo.png"}
+              title={"Ethereum"}
+              subtitle={"Ethereum"}
+              value={"0.512"}
+              subValue={"$124.29"}
+            />
+          </div>
         </div>
-      </div>
+
+        {/* Transactions */}
+
+        <div className="flex flex-col w-full gap-3">
+          <h1 className="font-bold text-[#19191B] text-lg">Transactions</h1>
+          <p className="text-[#A1A1A3] font-medium text-sm mt-1">09/20/2024</p>
+          <div className="flex flex-col w-full">
+            <TxItem
+              tokenImg={"/assets/eth-logo.png"}
+              chainImg={"/assets/eth-logo.png"}
+              title={"Ethereum"}
+              subtitle={`from ${shortenId(
+                "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
+              )}`}
+              value={"0.512"}
+            />
+
+            <TxItem
+              tokenImg={"/assets/eth-logo.png"}
+              chainImg={"/assets/eth-logo.png"}
+              title={"Ethereum"}
+              subtitle={`from ${shortenId(
+                "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
+              )}`}
+              value={"0.512"}
+            />
+
+            <TxItem
+              tokenImg={"/assets/eth-logo.png"}
+              chainImg={"/assets/eth-logo.png"}
+              title={"Ethereum"}
+              subtitle={`from ${shortenId(
+                "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
+              )}`}
+              value={"0.512"}
+            />
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

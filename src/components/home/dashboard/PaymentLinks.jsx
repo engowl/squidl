@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { cnm } from "../../../utils/style";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const paymentLinks = [
   {
@@ -17,9 +17,9 @@ const paymentLinks = [
   },
 ];
 
-const MotionLink = motion.create(Link);
-
 export default function PaymentLinks() {
+  const navigate = useNavigate();
+
   return (
     <div className="w-full rounded-3xl bg-neutral-50 pb-6">
       <div className="w-full flex items-center justify-between px-6 py-6">
@@ -30,21 +30,30 @@ export default function PaymentLinks() {
       </div>
       <div className="w-full flex flex-col mt-5 px-6">
         {paymentLinks.map((link, idx) => (
-          <MotionLink
+          <motion.div
+            onClick={() =>
+              navigate(`/${link.name}/detail`, {
+                state: { layoutId: `payment-card-${link.name}` },
+                preventScrollReset: false,
+              })
+            }
             layout
-            layoutId="payment-card"
-            to={"/test/detail"}
+            layoutId={`payment-card-${link.name}`}
+            transition={{ duration: 0.4 }}
             className={cnm(
-              "rounded-xl h-[269px] w-full",
+              "relative rounded-xl h-[269px] w-full",
               link.colorClassname,
               idx > 0 && "-mt-48"
             )}
+            whileHover={{ rotate: -5, y: -10 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ type: "ease", stiffness: 300, damping: 20 }}
           >
             <div className="text-white px-6 py-5 w-full flex items-center justify-between">
               <p className="font-medium">{link.name}</p>
               <p>${(293912).toLocaleString("en-US")}</p>
             </div>
-          </MotionLink>
+          </motion.div>
         ))}
       </div>
     </div>
