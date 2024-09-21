@@ -161,7 +161,7 @@ export default function AliasDetail() {
               scheme === "1" && "text-black"
             )}
           >
-            $8,888,888.88
+            $0
           </h1>
 
           <div className="absolute left-5 bottom-6 flex items-center justify-between">

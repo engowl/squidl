@@ -43,12 +43,12 @@ function Transactions() {
             chainImg={"/assets/eth-logo.png"}
             title={"trivial.jane.squidl.me - Deposit"}
             isNounsies
-            addressNounsies={"0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f34"}
+            addressNounsies={"0x02919065a8Ef7A7826b3D9f3DEFef2FA0a4d1f34"}
             subtitle={`from ${shortenAddress(
-              "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f34"
+              "0x19065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f34"
             )}`}
             value={"0.512 USDC"}
-            subValue={"$33912"}
+            subValue={"$332"}
           />
 
           <TxItem
@@ -58,23 +58,49 @@ function Transactions() {
             isNounsies
             addressNounsies={"0x02919065a8Ef7A782Bb3D9f3DEFef2F230a4d1f34"}
             subtitle={`from ${shortenAddress(
-              "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f32"
+              "0x02234065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f32"
             )}`}
             value={"0.512 USDC"}
-            subValue={"$33912"}
+            subValue={"$3912"}
           />
 
           <TxItem
             tokenImg={"/assets/eth-logo.png"}
             chainImg={"/assets/eth-logo.png"}
-            title={"yy.jane.squidl.me - Deposit"}
+            title={"zes.hui.squidl.me - Deposit"}
+            isNounsies
+            addressNounsies={"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}
+            subtitle={`from ${shortenAddress(
+              "0x06419065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f35"
+            )}`}
+            value={"0.512 USDC"}
+            subValue={"$12313"}
+          />
+
+          <TxItem
+            tokenImg={"/assets/eth-logo.png"}
+            chainImg={"/assets/eth-logo.png"}
+            title={"pol.manda.squidl.me - Deposit"}
             isNounsies
             addressNounsies={"0x02919065a8Ef7A782Bb3D9f3134Fef2FA0a4d1f34"}
             subtitle={`from ${shortenAddress(
-              "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f35"
+              "0x053249065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f35"
             )}`}
             value={"0.512 USDC"}
-            subValue={"$33912"}
+            subValue={"$12313"}
+          />
+
+          <TxItem
+            tokenImg={"/assets/eth-logo.png"}
+            chainImg={"/assets/eth-logo.png"}
+            title={"joi.mike.squidl.me - Deposit"}
+            isNounsies
+            addressNounsies={"0x49048044d57e1c92a77f79988d21fa8faf74e97e"}
+            subtitle={`from ${shortenAddress(
+              "0x09519065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f35"
+            )}`}
+            value={"0.512 USDC"}
+            subValue={"$12313"}
           />
         </div>
       </div>
