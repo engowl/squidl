@@ -2,8 +2,8 @@ import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
 import { dnsDecodeName, handleQuery, resolverAbi, schema } from "../../utils/ensUtils.js";
-import { concat, decodeFunctionData, encodeAbiParameters, encodePacked, isAddress, isHex, keccak256, toHex } from "viem";
-import { sign } from "viem/accounts";
+import { concat, decodeFunctionData, encodeAbiParameters, encodePacked, isAddress, isHex, keccak256, recoverAddress, toHex } from "viem";
+import { privateKeyToAccount, sign } from "viem/accounts";
 
 /**
  *
@@ -139,12 +139,15 @@ export const stealthAddressRoutes = (app, _, done) => {
         )
       )
 
+      // const account = privateKeyToAccount(`0x35ecaf3dc46d80f17b3cdcd5248b119c7c39f5135e04b1bdfa42e897f7bb0903`)
+      // console.log('account:', account)
+
       const sig = await sign({
         hash: messageHash,
         privateKey: process.env.ENS_RESOLVER_PK,
       })
       console.log('sig:', sig)
-      const sigData = concat([sig.r, sig.s, toHex(sig.v)])
+      const sigData = concat([sig.r, sig.s, toHex(sig.v)]);
       console.log('sigData:', sigData)
 
       const encodedResponse = encodeAbiParameters(
@@ -157,6 +160,17 @@ export const stealthAddressRoutes = (app, _, done) => {
       )
 
       console.log('encodedResponse:', encodedResponse)
+
+      // Try to verify the signature
+      // const signer = ethers.verifyMessage(messageHash, sigData)
+      // console.log('signer:', signer)
+
+      // Verify the signer
+      const recoveredAddress = await recoverAddress({
+        hash: messageHash,
+        signature: concat([sig.r, sig.s, toHex(sig.v)]),
+      });
+      console.log('Recovered signer address:', recoveredAddress);
 
       return encodedResponse;
     } catch (error) {
