@@ -1,5 +1,4 @@
-import { Button } from "@nextui-org/react";
-import Dashboard from "../components/home/Dashboard";
+import Dashboard from "../components/home/dashboard/Dashboard";
 
 export default function IndexPage() {
   return <Dashboard />;

@@ -1,73 +1,32 @@
-import { Button } from "@nextui-org/react";
 import { Link } from "react-router-dom";
-import { Icons } from "./Icons.jsx";
-import Nounsies from "./Nounsies.jsx";
-import {
-  DynamicUserProfile,
-  useDynamicContext,
-  useUserWallets,
-} from "@dynamic-labs/sdk-react-core";
+import { DollarSign, LayoutDashboard, Wallet } from "lucide-react";
 
 export default function Navbar() {
   return (
-    <nav className="flex items-center px-12 h-20 justify-between">
-      <div className="flex flex-row items-center gap-12">
-        <div className="w-24">
-          <img
-            src="/assets/squidl-logo.png"
-            alt="squidl-logo"
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        <div className="hidden md:flex items-center gap-3 font-medium">
-          <Link
-            to={"/"}
-            className="text-purply bg-neutral-50 px-3 py-2 rounded-xl"
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/payment"
-            className="text-purply bg-neutral-50 px-3 py-2 rounded-xl"
-          >
-            Payment Links
-          </Link>
-          <Link
-            to={"/transactions"}
-            className="text-purply bg-neutral-50 px-3 py-2 rounded-xl"
-          >
-            Transactions
-          </Link>
-        </div>
+    <div className="w-full pointer-events-none py-5 flex items-center justify-center fixed bottom-0 left-0">
+      <div className="bg-neutral-100 rounded-full p-1 flex text-sm">
+        <Link
+          to={"/"}
+          className="px-3 py-2 rounded-full flex items-center gap-1 bg-neutral-800 text-white"
+        >
+          <LayoutDashboard className="size-3" />
+          Dashboard
+        </Link>
+        <Link
+          to={"/"}
+          className="px-3 py-2 rounded-full flex items-center gap-1"
+        >
+          <Wallet className="size-3" />
+          Wallet
+        </Link>
+        <Link
+          to={"/"}
+          className="px-3 py-2 rounded-full flex items-center gap-1"
+        >
+          <DollarSign className="size-3" />
+          Payment
+        </Link>
       </div>
-
-      <div className="flex gap-4 items-center justify-center">
-        <Button className={"bg-[#563EEA] h-12 rounded-[24px] px-4"}>
-          <Icons.link />
-          <h1 className={"text-sm font-medium"}>Create Link</h1>
-        </Button>
-
-        <UserProfileButton />
-      </div>
-    </nav>
-  );
-}
-
-const UserProfileButton = () => {
-  const userWallets = useUserWallets();
-  const { setShowDynamicUserProfile } = useDynamicContext();
-
-  return (
-    <div className={"flex flex-col"}>
-      <button
-        onClick={() => setShowDynamicUserProfile(true)}
-        className="size-12 rounded-full overflow-hidden relative border-[4px] border-[#563EEA]"
-      >
-        <Nounsies address={userWallets[0]?.address || ""} />
-      </button>
-
-      <DynamicUserProfile variant={"dropdown"} />
     </div>
   );
-};
+}

@@ -1,11 +1,12 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "../components/shared/Navbar";
 import {
   DynamicEmbeddedWidget,
   useIsLoggedIn,
 } from "@dynamic-labs/sdk-react-core";
 import AuthProvider from "../providers/AuthProvider";
 import { Toaster } from "react-hot-toast";
+import Header from "../components/shared/Header";
+import Navbar from "../components/shared/Navbar";
 
 export default function AuthLayout() {
   // const isLoggedIn = useIsLoggedIn();
@@ -24,8 +25,9 @@ export default function AuthLayout() {
   return (
     <AuthProvider>
       <Toaster />
-      <Navbar />
+      <Header />
       <Outlet />
+      <Navbar />
     </AuthProvider>
   );
 }
