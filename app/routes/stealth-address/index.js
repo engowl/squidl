@@ -1,4 +1,5 @@
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
+import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
 
 /**
  *
@@ -23,6 +24,26 @@ export const stealthAddressRoutes = (app, _, done) => {
     // Fetch alias by id from your database or service
     return {}
   });
+
+  // For testing only, this endpoint will shows the chart data of a certain address
+  app.get('/chart/:address', async (req, res) => {
+    try {
+      const chainIds = req.query.chainIds ? req.query.chainIds.split(",").map(chainId => parseInt(chainId)) : [1, 137];
+      const chartData = await oneInchGetValueChart({
+        chainIds: chainIds,
+        addresses: [req.params.address]
+      })
+
+      return chartData;
+    } catch (error) {
+      console.error(error)
+      return {
+        error: error.message,
+        data: null,
+        message: "error while fetching chart data"
+      }
+    }
+  })
 
   // POST /aliases/new-alias, to create a new alias for a user
   app.post('/aliases/new-alias', {
