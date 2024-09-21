@@ -20,6 +20,7 @@ import {
   AVAILABLE_CARDS_BG,
   CARDS_SCHEME,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
+import { cnm } from "../../utils/style.js";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -140,14 +141,26 @@ export default function AliasDetail() {
 
         <div className="relative w-full h-52 md:h-60 flex flex-col items-center justify-start py-7 px-6">
           <div className="flex flex-row gap-2 items-center mr-auto">
-            <h1 className="text-white font-bold">{fullAlias}</h1>
+            <h1
+              className={cnm(
+                "text-white font-bold",
+                scheme === "1" && "text-black"
+              )}
+            >
+              {fullAlias}
+            </h1>
 
             <button onClick={() => onCopy("link")}>
               <Icons.copy className="text-[#848484] size-4" />
             </button>
           </div>
 
-          <h1 className="absolute top-1/2 -translate-y-1/2 text-white font-extrabold text-2xl">
+          <h1
+            className={cnm(
+              "absolute top-1/2 -translate-y-1/2 text-white font-extrabold text-2xl",
+              scheme === "1" && "text-black"
+            )}
+          >
             $8,888,888.88
           </h1>
 

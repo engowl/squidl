@@ -47,11 +47,11 @@ export const router = createBrowserRouter([
         element: <TransactionsPage />,
       },
       {
-        path: "/main-balance",
+        path: "/main-details",
         element: <MainBalancePage />,
       },
       {
-        path: "/private-balance",
+        path: "/private-details",
         element: <PrivateBalancePage />,
       },
     ],

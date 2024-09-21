@@ -4,7 +4,7 @@ import { shortenAddress } from "../utils/string";
 
 export default function PrivateBalancePage() {
   return (
-    <div className="flex min-h-screen w-full items-start justify-center py-24 px-4 md:px-10">
+    <div className="flex min-h-screen w-full items-start justify-center py-32 px-4 md:px-10">
       <Transactions />
     </div>
   );
@@ -14,14 +14,14 @@ function Transactions() {
   return (
     <div className="overflow-hidden rounded-4xl bg-oasis-blue ">
       <div className="w-full rounded-2xl h-14 p flex items-center justify-center gap-2 text-sm text-white">
-        This transactions benefit oasis privacy protocol
         <div className="bg-white size-6 rounded-xl">
           <img
-            src="'/assets/oasis-logo.png"
+            src="/assets/oasis-logo.png"
             alt="oasis-logo"
             className="w-full h-full object-contain"
           />
         </div>
+        This transactions benefit oasis privacy protocol
       </div>
       <div
         className={

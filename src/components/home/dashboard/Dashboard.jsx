@@ -285,10 +285,10 @@ function BalanceMode({ mode }) {
 
   function onNavigate() {
     if (mode === "available") {
-      navigate("/main-balance");
+      navigate("/main-details");
     }
     if (mode === "private") {
-      navigate("/private-balance");
+      navigate("/private-details");
     }
   }
 

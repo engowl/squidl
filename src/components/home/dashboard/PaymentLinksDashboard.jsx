@@ -107,7 +107,7 @@ export default function PaymentLinksDashboard({ user }) {
       ) : (
         <div className="w-full flex flex-col px-6">
           {aliases && aliases.length > 0 ? (
-            aliases.slice(0, 1).map((alias, idx) => {
+            aliases.slice(0, 4).map((alias, idx) => {
               console.log({ alias });
               const bgImage =
                 AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];

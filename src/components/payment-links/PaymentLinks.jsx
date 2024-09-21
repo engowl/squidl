@@ -3,6 +3,7 @@ import { cnm } from "../../utils/style.js";
 import { useNavigate } from "react-router-dom";
 import {
   AVAILABLE_CARDS_BG,
+  CARDS_SCHEME,
   paymentLinks,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
 import useSWR from "swr";
@@ -15,6 +16,14 @@ export default function PaymentLinks() {
   const navigate = useNavigate();
   const [, setOpen] = useAtom(isCreateLinkDialogAtom);
 
+  const { data: user, isLoading: isLoadingMe } = useSWR(
+    "/auth/me",
+    async (url) => {
+      const { data } = await squidlAPI.get(url);
+      return data;
+    }
+  );
+
   const { data: aliases, isLoading } = useSWR(
     "/stealth-address/aliases",
     async (url) => {
@@ -26,40 +35,41 @@ export default function PaymentLinks() {
   return (
     <div
       className={
-        "relative flex flex-col gap-9 w-full max-w-md items-start justify-center bg-[#F9F9FA] rounded-[32px] p-4 md:p-6"
+        "relative flex flex-col gap-9 w-full max-w-md items-start justify-center bg-[#F9F9FA] rounded-[32px] pb-6"
       }
     >
-      <h1 className="text-[#19191B] font-medium text-lg">Recently Created</h1>
+      <h1 className="text-[#19191B] font-medium text-lg px-6 pt-6">
+        Recently Created
+      </h1>
 
-      <div className="w-full flex flex-col -mt-3 px-6">
+      <div className="w-full flex flex-col px-6">
         {aliases && aliases.length > 0 ? (
-          paymentLinks.map((link, idx) => {
+          aliases.map((alias, idx) => {
             const bgImage = AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
-
+            const userAlias = alias.alias ? alias.alias : user.username;
+            const colorScheme = CARDS_SCHEME[idx % CARDS_SCHEME.length];
             return (
               <motion.div
                 key={idx}
                 onClick={() =>
-                  navigate(`/${link.name}/detail/2`, {
-                    state: { layoutId: `payment-card-${link.name}-2` },
+                  navigate(`/${userAlias}/detail/1?scheme=${colorScheme}`, {
+                    state: { layoutId: `payment-card-${userAlias}-1` },
                     preventScrollReset: false,
                   })
                 }
                 layout
-                layoutId={`payment-card-${link.name}-2`}
+                layoutId={`payment-card-${userAlias}-2`}
                 transition={{ duration: 0.4 }}
                 className={cnm(
-                  "relative rounded-2xl h-52 md:h-60 w-full",
-                  link.colorClassname,
+                  "relative rounded-2xl h-52 md:h-60 w-full cursor-pointer overflow-hidden",
                   idx > 0 && "-mt-36 md:-mt-44"
                 )}
-                whileHover={{ rotate: -5, y: -10 }}
-                viewport={{ once: true, amount: 0.5 }}
+                whileHover={{ rotate: -5, y: -20 }}
               >
                 <img
                   src={bgImage}
                   alt="card-bg"
-                  className="absolute w-full h-full object-cover rounded-[24px]"
+                  className="absolute w-full h-full object-cover rounded-[24px] inset-0"
                 />
 
                 <div
@@ -72,7 +82,7 @@ export default function PaymentLinks() {
                     }`
                   )}
                 >
-                  <p className="font-medium">{link.name}</p>
+                  <p className="font-medium">{`${alias.alias}.${user.username}.squidl.me`}</p>
                   <p>${(293912).toLocaleString("en-US")}</p>
                 </div>
 
