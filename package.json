@@ -1,0 +1,23 @@
+{
+  "name": "ethsg2024",
+  "module": "index.ts",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
+    "@nomiclabs/hardhat-solhint": "^4.0.1",
+    "@oasisprotocol/sapphire-contracts": "^0.2.10",
+    "@oasisprotocol/sapphire-hardhat": "^2.19.4",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/bun": "latest",
+    "elliptic-curve-solidity": "https://github.com/witnet/elliptic-curve-solidity#master",
+    "ethers": "^6.13.2",
+    "hardhat": "^2.22.11",
+    "hardhat-tracer": "^3.1.0",
+    "typechain": "^8.3.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
