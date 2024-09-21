@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { ZERO_ADDRESS } from 'thirdweb'
 import { bytesToString, decodeFunctionData, encodeFunctionResult, isAddress, isHex, parseAbi, toBytes } from 'viem/utils'
 import { z } from 'zod'
 
@@ -77,8 +78,41 @@ export async function handleQuery({
   )
   console.log('abiItem:', abiItem)
 
+  // const randomWallet = ethers.Wallet.createRandom().address
+  // res = randomWallet
+
   const randomWallet = ethers.Wallet.createRandom().address
-  res = randomWallet
+  const nameData = {
+    address: randomWallet,
+    texts: {
+      url: 'https://test.com'
+    }
+  }
+
+  switch (functionName) {
+    case 'addr': {
+      const coinType = args[1] ?? BigInt(60); // Default coinType to 60 (ETH)
+      res = nameData?.address ?? ZERO_ADDRESS; // Resolve the address or return ZERO_ADDRESS if not available
+      break;
+    }
+    case 'text': {
+      const key = args[1];
+      if (key === 'url') {
+        res = nameData?.texts?.url ?? 'https://test.com'; // Resolve the 'url' key, defaulting to 'https://test.com'
+      } else {
+        res = nameData?.texts?.[key] ?? ''; // Handle other text keys
+      }
+      break;
+    }
+    case 'contenthash': {
+      res = nameData?.contenthash ?? '0x'; // Resolve the contenthash or return '0x' if not available
+      break;
+    }
+    default: {
+      throw new Error(`Unsupported query function ${functionName}`);
+    }
+  }
+
 
   return {
     ttl: 1000,

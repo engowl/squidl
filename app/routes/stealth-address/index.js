@@ -158,9 +158,7 @@ export const stealthAddressRoutes = (app, _, done) => {
 
       console.log('encodedResponse:', encodedResponse)
 
-      return {
-        data: encodedResponse
-      };
+      return encodedResponse;
     } catch (error) {
       console.error(error)
       return {
