@@ -27,6 +27,7 @@ export default {
           900: "#37169c",
           950: "#200b6a",
         },
+        "oasis-blue": "#2127FF",
       },
       borderRadius: {
         "4xl": "32px",

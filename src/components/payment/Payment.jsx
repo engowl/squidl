@@ -7,11 +7,21 @@ import {
 } from "@dynamic-labs/sdk-react-core";
 import { Button } from "@nextui-org/react";
 import { shortenId } from "../../utils/FormattingUtils.js";
+import { QRCode } from "react-qrcode-logo";
+import axios from "axios";
+import useSWR from "swr";
 
 export default function Payment() {
   const isLoggedIn = useIsLoggedIn();
   const { enabled, openFunding } = useFunding();
   const { setShowAuthFlow } = useDynamicContext();
+  const { data: aliasAddress, isLoading } = useSWR(
+    "/stealth-address/address/new-address",
+    async (url) => {
+      const { data } = await axios.get(`https://api.squidl.me` + url);
+      return data.address;
+    }
+  );
 
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
@@ -59,12 +69,16 @@ export default function Payment() {
           <div className="size-6 rounded-full bg-[#A1A1A3]"></div>
         </div>
 
-        <div className="bg-[#563EEA] rounded-[50px] mt-7 p-5 flex flex-col items-center justify-center gap-4 w-full">
-          <div className="size-32 bg-white p-6 rounded-[32px]">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png"
-              alt="qr"
-              className="w-full h-full object-contain"
+        <div className="bg-[#563EEA] rounded-3xl mt-7 p-5 flex flex-col items-center justify-center gap-4">
+          <div className="size-36 bg-white overflow-hidden p-1 rounded-xl">
+            <QRCode
+              value="https://bozo.squidl.me/0x32232332sa"
+              qrStyle="dots"
+              logoImage="/assets/squidl-logo-only.png"
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
             />
           </div>
 
@@ -82,7 +96,7 @@ export default function Payment() {
         <div className="flex flex-col gap-4 mt-4 items-center justify-center w-full">
           <div className="flex bg-white rounded-[30.5px] gap-4 w-full items-center justify-between">
             <h1 className="text-[#19191B] font-medium px-4 py-3">
-              {shortenId("0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37")}
+              {isLoading ? "" : shortenId(aliasAddress)}
             </h1>
             <button
               onClick={() => onCopy("address")}

@@ -59,10 +59,10 @@ export default function PaymentLinks() {
           See More
         </button>
       </motion.div>
-      <div className="w-full flex flex-col mt-5 px-6">
+      <div className="w-full flex flex-col px-6">
         {paymentLinks.map((link, idx) => {
           return (
-            <motion.div
+            <motion.button
               key={idx}
               onClick={() =>
                 navigate(`/${link.name}/detail`, {
@@ -74,18 +74,25 @@ export default function PaymentLinks() {
               layoutId={`payment-card-${link.name}`}
               transition={{ duration: 0.4 }}
               className={cnm(
-                "relative rounded-2xl h-[269px] w-full",
+                "relative rounded-2xl h-[269px] w-full flex flex-col overflow-hidden",
                 link.colorClassname,
                 idx > 0 && "-mt-48"
               )}
               whileHover={{ rotate: -5, y: -10 }}
               viewport={{ once: true, amount: 0.5 }}
             >
-              <div className="text-white px-6 py-5 w-full flex items-center justify-between">
+              {idx === 2 && (
+                <img
+                  src="/assets/card.png"
+                  alt="card-placeholder"
+                  className="absolute w-full h-full object-cover"
+                />
+              )}
+              <div className="text-white px-6 py-5 w-full flex items-center justify-between relative">
                 <p className="font-medium">{link.name}</p>
                 <p>${(293912).toLocaleString("en-US")}</p>
               </div>
-            </motion.div>
+            </motion.button>
           );
         })}
       </div>

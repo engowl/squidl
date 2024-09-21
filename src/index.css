@@ -39,6 +39,75 @@
 
 @layer base {
   body {
-    @apply font-athletics;
+    @apply font-athletics light;
+  }
+}
+
+@layer components {
+  .private-radar-scanner {
+    -webkit-clip-path: polygon(
+      0 0,
+      93.3673469388% 0,
+      93.3673469388% 25.1275510204%,
+      50% 50.1275510204%,
+      0 50.1275510204%
+    );
+    clip-path: polygon(
+      0 0,
+      93.3673469388% 0,
+      93.3673469388% 25.1275510204%,
+      50% 50.1275510204%,
+      0 50.1275510204%
+    );
+    height: 410px;
+    left: 17px;
+    position: absolute;
+    top: -44px;
+    flex-shrink: 0;
+    transform: rotate(-201deg);
+    width: 410px;
+    animation: privateRadarScannerAnimation 10s infinite linear;
+  }
+
+  .private-radar-scanner::before {
+    background: linear-gradient(
+      267deg,
+      rgba(99, 102, 241, 0.1) 13.23%,
+      rgba(3, 0, 20, 0) 50%
+    );
+    border-radius: 50%;
+    display: block;
+    height: 100%;
+    width: 100%;
+    content: "";
+  }
+  .private-radar-scanner::after {
+    content: "";
+    background: linear-gradient(
+        to bottom,
+        rgba(120, 123, 255, 0.24) 0.11%,
+        rgba(120, 123, 255, 0) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.24) 0.11%,
+        rgba(255, 255, 255, 0) 100%
+      );
+    height: 50%;
+    left: 50%;
+    transform: rotate(60deg);
+    position: absolute;
+    top: 0;
+    transform-origin: bottom;
+    width: 2px;
+  }
+}
+
+@keyframes privateRadarScannerAnimation {
+  0% {
+    transform: rotate(-201deg);
+  }
+  100% {
+    transform: rotate(159deg);
   }
 }
