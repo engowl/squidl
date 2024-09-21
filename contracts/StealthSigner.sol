@@ -6,7 +6,12 @@ import "hardhat/console.sol";
 
 import { Sapphire } from "@oasisprotocol/sapphire-contracts/contracts/Sapphire.sol";
 import { EthereumUtils } from "@oasisprotocol/sapphire-contracts/contracts/EthereumUtils.sol";
+import { EIP155Signer } from "@oasisprotocol/sapphire-contracts/contracts/EIP155Signer.sol";
 import { Secp256k1 } from "./Secp256k1.sol";
+
+interface RemoteContract {
+    function example(uint256 test) external;
+}
 
 contract StealthSigner {
     address public scanner;
@@ -46,10 +51,10 @@ contract StealthSigner {
         return string(abi.encodePacked("st:eth:0x", bytesToHex(spendPub), bytesToHex(viewingPub)));
     }
 
-    function generateStealthAddress()
+    function generateStealthAddress(uint32 k)
         public
         view
-        returns (address stealthAddress, bytes memory ephemeralPub, bytes1 viewTag)
+        returns (address stealthAddress, bytes memory ephemeralPub, bytes1 viewHint)
     {
         // Generate a random 32-byte entropy ephemeral private key .
         // For each private key ai, check that the private key produces a point with an even Y coordinate and negate the private key if not
@@ -69,17 +74,17 @@ contract StealthSigner {
         (uint256 sX, uint256 sY) = Secp256k1.ecMul(uint256(ephemeralKey), viewingPubX, viewingPubY);
 
         // Let k = 0
-        uint32 k = 0;
+        // uint32 k = 0;
 
         // The shared secret is hashed.
-        // Let tk = hashBIP0352/SharedSecret(serP(ecdh_shared_secret) || ser32(k))
+        // Let tk = hash/SharedSecret(serP(ecdh_shared_secret) || ser32(k))
         bytes32 sKey = keccak256(abi.encodePacked(bytes32(sX), bytes32(sY), k));
 
         // If tk is not valid tweak, i.e., if tk = 0 or tk is larger or equal to the secp256k1 group order, fail
         require(uint256(sKey) < Secp256k1.NN, "tweak is too large");
 
         // The view tag is extracted by taking the most significant byte of the shared secret.
-        viewTag = sKey[0];
+        viewHint = sKey[0];
 
         // Multiply the hashed shared secret with the generator point, and add it to P-spend.
         // Let Pmn = Bm + tk·G
@@ -94,7 +99,7 @@ contract StealthSigner {
         stealthAddress = address(uint160(uint256(keccak256(abi.encodePacked(stealthPubX, stealthPubY)))));
     }
 
-    function checkStealthAddress(bytes calldata ephemeralPub, bytes1 viewTag)
+    function checkStealthAddress(uint32 k, bytes calldata ephemeralPub, bytes1 viewHint)
         public
         view
         returns (address stealthAddress)
@@ -111,9 +116,9 @@ contract StealthSigner {
         (uint256 sX, uint256 sY) = Secp256k1.ecMul(uint256(viewingKey), ephemeralPubX, ephemeralPubY);
 
         // Let k = 0
-        uint32 k = 0;
+        // uint32 k = 0;
 
-        // Let tk = hashBIP0352/SharedSecret(serP(ecdh_shared_secret) || ser32(k))
+        // Let tk = hash/SharedSecret(serP(ecdh_shared_secret) || ser32(k))
         bytes32 sKey = keccak256(abi.encodePacked(bytes32(sX), bytes32(sY), k));
 
         // If tk is not valid tweak, i.e., if tk = 0 or tk is larger or equal to the secp256k1 group order, fail
@@ -121,7 +126,7 @@ contract StealthSigner {
 
         // The view tag is extracted by taking the most significant byte and can be compared to the given view tag.
         // If the view tags do not match, this Announcement is not for the user and the remaining steps can be skipped. If the view tags match, continue on.
-        require(sKey[0] == viewTag, "view tag mismatch");
+        require(sKey[0] == viewHint, "view tag mismatch");
 
         // Multiply the hashed shared secret with the generator point, and add it to P-spend.
         // Compute Pk = Bspend + tk·G
@@ -137,7 +142,7 @@ contract StealthSigner {
         stealthAddress = address(uint160(uint256(keccak256(abi.encodePacked(stealthPubX, stealthPubY)))));
     }
 
-    function computeStealthKey(bytes calldata ephemeralPub)
+    function computeStealthKey(uint32 k, bytes calldata ephemeralPub)
         public
         view
         returns (bytes32 stealthKey, address stealthAddress)
@@ -152,18 +157,51 @@ contract StealthSigner {
         (uint256 sX, uint256 sY) = Secp256k1.ecMul(uint256(viewingKey), ephemeralPubX, ephemeralPubY);
 
         // Let k = 0
-        uint32 k = 0;
+        // uint32 k = 0;
 
-        // Let tk = hashBIP0352/SharedSecret(serP(ecdh_shared_secret) || ser32(k))
+        // Let tk = hash/SharedSecret(serP(ecdh_shared_secret) || ser32(k))
         // Q_hex = sha3.keccak_256(Q[0].to_bytes(32, "big")+Q[1].to_bytes(32, "big")).hexdigest()
         bytes32 sKey = keccak256(abi.encodePacked(bytes32(sX), bytes32(sY), k));
 
         // Bob can spend from his cold storage signing device using (bspend + hash(bscan·A || 0)) mod n as the private key.
-        // Let d = (bspend + tk + hashBIP0352/Label(ser256(bscan) || ser32(m))) mod n, where hashBIP0352/Label(ser256(bscan) || ser32(m)) is the optional label
+        // Let d = (bspend + tk + hash/Label(ser256(bscan) || ser32(m))) mod n, where hash/Label(ser256(bscan) || ser32(m)) is the optional label
         stealthKey = bytes32(addmod(uint256(spendKey), uint256(sKey), Secp256k1.NN));
 
         bytes memory stealthPub = derivePubKey(bytes.concat(stealthKey));
         stealthAddress = EthereumUtils.k256PubkeyToEthereumAddress(stealthPub);
+    }
+
+    function createTransaction(uint32 k, bytes calldata ephemeralPub, uint64 nonce, uint256 gasPrice, uint chainId)
+        public view
+        returns (bytes memory)
+    {
+        EIP155Signer.EthTx memory unsignedTx = EIP155Signer.EthTx({
+            nonce: nonce,
+            gasPrice: gasPrice,
+            gasLimit: 1000000,
+            // to: remoteContract, // address of RemoteContract
+            to: address(this),
+            value: 0,
+            data: abi.encodeCall(
+                // RemoteContract.example,
+                this.calledByOurselves,
+                (gasPrice)
+            ),
+            chainId: chainId == 0x0 ? block.chainid : chainId
+        });
+
+        (bytes32 stealthKey, address stealthAddress) = computeStealthKey(k, ephemeralPub);
+
+        return EIP155Signer.sign(stealthAddress, stealthKey, unsignedTx);
+    }
+
+    event TestEvent(uint example);
+
+    function calledByOurselves(uint256 example)
+        public
+    {
+        // require(msg.sender == address(this), "only self");
+        emit TestEvent(example);
     }
 
     function bytesToHex(bytes memory buffer) internal pure returns (string memory) {
@@ -214,15 +252,19 @@ contract StealthSigner {
             randSeed
         );
 
-        // uint8 prefix = uint8(pubKey[0]);
-        // if (prefix == 0x03) {
-        //     randSeed = abi.encodePacked(Secp256k1.NN - uint256(secretKey));
-        //     secretKey = bytes32(randSeed);
-        //     bytes32 pubX;
-        //     assembly {
-        //         pubX := mload(add(pubKey, 33))
-        //     }
-        //     pubKey = abi.encodePacked(uint8(0x02), pubX);
-        // }
+        // Optional: Optimize for even public keys only (allowing for 32-bytes view and spend keys)
+        uint8 prefix = uint8(pubKey[0]);
+        if (prefix == 0x03) {
+            // Negate the private key
+            randSeed = abi.encodePacked(Secp256k1.NN - uint256(secretKey));
+            secretKey = bytes32(randSeed);
+
+            // Update the public key to 0x02 prefix
+            bytes32 pubX;
+            assembly {
+                pubX := mload(add(pubKey, 33))
+            }
+            pubKey = abi.encodePacked(uint8(0x02), pubX);
+        }
     }
 }
