@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
 
@@ -55,12 +56,15 @@ export const stealthAddressRoutes = (app, _, done) => {
   });
 
   // GET /address/:alias-id/new-address, to get new stealth address of a certain alias. This endpoint is important, and it will be used for ENS CCIP read too
-  app.get('/address/:alias/new-address', async (req, res) => {
+  app.get('/address/new-address', async (req, res) => {
     const { alias } = req.params;
     // Generate or fetch new stealth address logic for aliasId
     // TODO: generate a stealth address, then save it to the database
 
-    return "0xabc"; // Example stealth address
+    // Random address
+    const wallet = ethers.Wallet.createRandom();
+
+    return { address: wallet.address };
   });
 
   app.get('/aliases/resolve/:sender/:data.json', async (request, reply) => {
