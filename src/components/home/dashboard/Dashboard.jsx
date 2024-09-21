@@ -15,14 +15,25 @@ export default function Dashboard() {
     });
   }, []);
 
+  const isBack = location.state?.isBack || false;
+
+  useEffect(() => {
+    const paymentLinks = document.querySelector("#payment-links");
+    paymentLinks.scrollIntoView({
+      behavior: "instant",
+    });
+  }, []);
   return (
-    <div className="w-full min-h-screen flex flex-col items-center pt-12 pb-20">
-      <div className="w-full max-w-md flex flex-col items-center gap-4">
+    <motion.div
+      layoutScroll
+      className="w-full h-screen flex flex-col items-center  overflow-y-auto"
+    >
+      <div className="w-full max-w-md flex flex-col items-center gap-4 pt-12 pb-20">
         <ReceiveCard />
         <TotalBalance />
         <PaymentLinks />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -144,6 +155,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { motion } from "framer-motion";
 
 const data = [
   { name: "Page A", uv: 400 },

@@ -22,6 +22,8 @@ export default function AliasDetail() {
 
   const layoutId = location.state?.layoutId || `payment-card-${alias}`;
 
+  console.log({ layoutId });
+
   useEffect(() => {
     window.scrollTo(0, 0); // Reset scroll to top
   }, []);
@@ -34,7 +36,13 @@ export default function AliasDetail() {
     >
       <div className="flex items-center justify-between w-full">
         <Button
-          onClick={() => navigate(-1, { replace: true })}
+          onClick={() =>
+            navigate("/", {
+              state: {
+                isBack: true,
+              },
+            })
+          }
           className="flex items-center gap-1 bg-white rounded-[21px] h-10 pl-3 pr-4"
         >
           <Icons.back className="text-black" />
