@@ -34,6 +34,25 @@ const config: HardhatUserConfig = {
       chainId: 0x5afd,
     },
   },
+  etherscan: {
+    customChains: [
+      {
+        network: "sapphire-testnet",
+        chainId: 0x5aff,
+        urls: {
+          apiURL: "https://explorer.oasis.io/testnet/sapphire/api",
+          browserURL: "https://explorer.oasis.io/testnet/sapphire/",
+        },
+      },
+    ],
+  },
+  sourcify: {
+    enabled: true,
+    // Optional: specify a different Sourcify server
+    apiUrl: "https://sourcify.dev/server",
+    // Optional: specify a different Sourcify repository
+    browserUrl: "https://repo.sourcify.dev",
+  }
 };
 
 export default config;

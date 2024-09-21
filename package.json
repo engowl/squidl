@@ -5,6 +5,7 @@
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.11",
     "@nomiclabs/hardhat-solhint": "^4.0.1",
     "@oasisprotocol/sapphire-contracts": "^0.2.10",
     "@oasisprotocol/sapphire-hardhat": "^2.19.4",

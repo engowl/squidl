@@ -9,53 +9,170 @@ import { EthereumUtils } from "@oasisprotocol/sapphire-contracts/contracts/Ether
 import { EIP155Signer } from "@oasisprotocol/sapphire-contracts/contracts/EIP155Signer.sol";
 import { Secp256k1 } from "./Secp256k1.sol";
 
+import { Enclave, autoswitch, Result } from "@oasisprotocol/sapphire-contracts/contracts/OPL.sol";
+
 interface RemoteContract {
     function example(uint256 test) external;
 }
 
+struct SignatureRSV {
+    bytes32 r;
+    bytes32 s;
+    uint256 v;
+}
+
+// contract StealthSigner is Enclave {
 contract StealthSigner {
-    address public scanner;
+    bytes32 public constant EIP712_DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+    string public constant SIGNIN_TYPE = "SignIn(address user,uint32 time)";
+    bytes32 public constant SIGNIN_TYPEHASH = keccak256(bytes(SIGNIN_TYPE));
+    bytes32 public immutable DOMAIN_SEPARATOR;
 
-    bytes32 private viewingKey;
-    bytes public viewingPub;
-    // uint256 public viewingPubX;
-    // uint256 public viewingPubY;
+    struct UserKeyPair {
+        bytes pub;
+        bytes32 key;
+    }
 
-    bytes32 private spendKey;
-    bytes public spendPub;
-    // uint256 public spendPubX;
-    // uint256 public spendPubY;
+    // One viewingPairs per metaAddress
+    mapping(string => UserKeyPair) private viewingPairs;
 
-    constructor (address _scanner)
+    // One spendPair per user address
+    mapping(address => UserKeyPair) private spendPairs;
+
+    // Store the owner of the metaAddresses privately
+    mapping(string => address) private owners;
+
+    // Store the metaAddresses of the user privately
+    mapping(address => string[]) private metaAddresses;
+
+    // address public scanner;
+
+    constructor (address otherEnd)
+        // Enclave(otherEnd, autoswitch("bsc"))
         payable
     {
-        scanner = _scanner;
+        // scanner = _scanner;
 
         // Test Vectors
-        viewingKey = 0x0000000000000000000000000000000000000000000000000000000000000002;
-        viewingPub = derivePubKey(bytes.concat(viewingKey));
-        // (viewingPubX, viewingPubY) = EthereumUtils.k256Decompress(viewingPub);
-        spendKey = 0x0000000000000000000000000000000000000000000000000000000000000003;
-        spendPub = derivePubKey(bytes.concat(spendKey));
-        // (spendPubX, spendPubY) = EthereumUtils.k256Decompress(spendPub);
+        // viewingKey = 0x0000000000000000000000000000000000000000000000000000000000000002;
+        // viewingPub = derivePubKey(bytes.concat(viewingKey));
+        // // (viewingPubX, viewingPubY) = EthereumUtils.k256Decompress(viewingPub);
+        // spendKey = 0x0000000000000000000000000000000000000000000000000000000000000003;
+        // spendPub = derivePubKey(bytes.concat(spendKey));
+        // // (spendPubX, spendPubY) = EthereumUtils.k256Decompress(spendPub);
 
-        (viewingPub, viewingKey) = generateKeypair();
-        (spendPub, spendKey) = generateKeypair();
+        // registerEndpoint("register", myFunction);
+
+        DOMAIN_SEPARATOR = keccak256(abi.encode(
+            EIP712_DOMAIN_TYPEHASH,
+            keccak256("SignInExample.SignIn"),
+            keccak256("1"),
+            block.chainid,
+            address(this)
+        ));
+
+        (bytes memory viewingPub, bytes32 viewingKey) = generateKeypair();
+        (bytes memory spendPub, bytes32 spendKey) = generateKeypair();
+
+        string memory metaAddress = string(abi.encodePacked("st:eth:0x", bytesToHex(spendPub), bytesToHex(viewingPub)));
+        viewingPairs[metaAddress] = UserKeyPair(viewingPub, viewingKey);
+        spendPairs[msg.sender] = UserKeyPair(spendPub, spendKey);
+        owners[metaAddress] = msg.sender;
+        metaAddresses[msg.sender].push(metaAddress);
     }
 
-    function getMetaAddress()
-        public view
-        returns (string memory)
+    // function myFunction(bytes calldata _args)
+    //     internal
+    //     returns(Result)
+    // {
+    //     (uint256 a, bool b) = abi.decode(_args, (uint256, bool));
+    //     return Result.Success;
+    // }
+
+    struct SignIn {
+        address user;
+        uint32 time;
+        SignatureRSV rsv;
+    }
+
+    modifier authenticated(SignIn calldata auth)
     {
-        // TODO: Let Bm = Bspend + hash(bscan || m)·G where m is an incrementable integer starting from 1
-        return string(abi.encodePacked("st:eth:0x", bytesToHex(spendPub), bytesToHex(viewingPub)));
+        // Must be signed within 24 hours ago.
+        require( auth.time > (block.timestamp - (60*60*24)) );
+
+        // Validate EIP-712 sign-in authentication.
+        bytes32 authdataDigest = keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                SIGNIN_TYPEHASH,
+                auth.user,
+                auth.time
+            ))
+        ));
+
+        address recovered_address = ecrecover(
+            authdataDigest, uint8(auth.rsv.v), auth.rsv.r, auth.rsv.s);
+
+        require( auth.user == recovered_address, "Invalid Sign-In" );
+
+        _;
     }
 
-    function generateStealthAddress(uint32 k)
+    function register(SignIn calldata auth)
         public
-        view
+        authenticated(auth)
+    {
+        string memory metaAddress;
+        (bytes memory viewingPub, bytes32 viewingKey) = generateKeypair();
+        UserKeyPair memory spendKeyPair = spendPairs[auth.user];
+
+        // Only one spending key per user
+        if (spendKeyPair.key != 0) {
+            metaAddress = string(abi.encodePacked("st:eth:0x", bytesToHex(spendKeyPair.pub), bytesToHex(viewingPub)));
+            viewingPairs[metaAddress] = UserKeyPair(viewingPub, viewingKey);
+        } else {
+            (bytes memory spendPub, bytes32 spendKey) = generateKeypair();
+            metaAddress = string(abi.encodePacked("st:eth:0x", bytesToHex(spendPub), bytesToHex(viewingPub)));
+            viewingPairs[metaAddress] = UserKeyPair(viewingPub, viewingKey);
+            spendPairs[auth.user] = UserKeyPair(spendPub, spendKey);
+        }
+
+        owners[metaAddress] = auth.user;
+        metaAddresses[auth.user].push(metaAddress);
+    }
+
+    function getMetaAddress(SignIn calldata auth, uint256 index)
+        public view
+        authenticated(auth)
+        returns (string memory metaAddress, bytes memory spendPub, bytes memory viewingPub)
+    {
+        metaAddress = metaAddresses[auth.user][index];
+
+        UserKeyPair memory viewingPair = viewingPairs[metaAddress];
+        require(viewingPair.key != 0, "metaAddress not registered yet");
+        viewingPub = viewingPair.pub;
+    
+        UserKeyPair memory spendPair = spendPairs[auth.user];
+        require(spendPair.key != 0, "metaAddress not registered yet");
+        spendPub = spendPair.pub;
+
+        // // TODO: Let Bm = Bspend + hash(bscan || m)·G where m is an incrementable integer starting from 1
+        // metaAddress = string(abi.encodePacked("st:eth:0x", bytesToHex(spendPub), bytesToHex(viewingPub)));
+    }
+
+    function generateStealthAddress(string calldata metaAddress, uint32 k)
+        public view
         returns (address stealthAddress, bytes memory ephemeralPub, bytes1 viewHint)
     {
+        UserKeyPair memory viewingPair = viewingPairs[metaAddress];
+        require(viewingPair.key != 0, "metaAddress not registered yet");
+        bytes memory viewingPub = viewingPair.pub;
+    
+        UserKeyPair memory spendPair = spendPairs[owners[metaAddress]];
+        require(spendPair.key != 0, "metaAddress not registered yet");
+        bytes memory spendPub = spendPair.pub;
+
         // Generate a random 32-byte entropy ephemeral private key .
         // For each private key ai, check that the private key produces a point with an even Y coordinate and negate the private key if not
         bytes32 ephemeralKey;
@@ -99,13 +216,20 @@ contract StealthSigner {
         stealthAddress = address(uint160(uint256(keccak256(abi.encodePacked(stealthPubX, stealthPubY)))));
     }
 
-    function checkStealthAddress(uint32 k, bytes calldata ephemeralPub, bytes1 viewHint)
-        public
-        view
+    function checkStealthAddress(string calldata metaAddress, uint32 k, bytes calldata ephemeralPub, bytes1 viewHint)
+        public view
         returns (address stealthAddress)
     {
+        UserKeyPair memory viewingPair = viewingPairs[metaAddress];
+        bytes32 viewingKey = viewingPair.key;
+        require(viewingKey != 0, "metaAddress not registered yet");
+    
+        UserKeyPair memory spendPair = spendPairs[owners[metaAddress]];
+        require(spendPair.key != 0, "metaAddress not registered yet");
+        bytes memory spendPub = spendPair.pub;
+    
         // TODO: only allow the scanner to call this function
-        require(msg.sender == scanner, "only the scanner can call this function");
+        // require(msg.sender == scanner, "only the scanner can call this function");
 
         // Let A = A1 + A2 + ... + An, where each Ai is the public key of an ephemeral key pair.
         (uint256 ephemeralPubX, uint256 ephemeralPubY) = EthereumUtils.k256Decompress(ephemeralPub);
@@ -142,12 +266,17 @@ contract StealthSigner {
         stealthAddress = address(uint160(uint256(keccak256(abi.encodePacked(stealthPubX, stealthPubY)))));
     }
 
-    function computeStealthKey(uint32 k, bytes calldata ephemeralPub)
-        public
-        view
+    function _computeStealthKey(string calldata metaAddress, uint32 k, bytes calldata ephemeralPub)
+        internal view
         returns (bytes32 stealthKey, address stealthAddress)
     {
-        // TODO: require EIP712 signed session
+        UserKeyPair memory viewingPair = viewingPairs[metaAddress];
+        bytes32 viewingKey = viewingPair.key;
+        require(viewingKey != 0, "metaAddress not registered yet");
+    
+        UserKeyPair memory spendPair = spendPairs[owners[metaAddress]];
+        bytes32 spendKey = spendPair.key;
+        require(spendKey != 0, "metaAddress not registered yet");
 
         // Let A = A1 + A2 + ... + An, where each Ai is the public key of an ephemeral key pair.
         (uint256 ephemeralPubX, uint256 ephemeralPubY) = EthereumUtils.k256Decompress(ephemeralPub);
@@ -171,10 +300,25 @@ contract StealthSigner {
         stealthAddress = EthereumUtils.k256PubkeyToEthereumAddress(stealthPub);
     }
 
-    function createTransaction(uint32 k, bytes calldata ephemeralPub, uint64 nonce, uint256 gasPrice, uint chainId)
+    function computeStealthKey(SignIn calldata auth, string calldata metaAddress, uint32 k, bytes calldata ephemeralPub)
         public view
+        authenticated(auth)
+        returns (bytes32 stealthKey, address stealthAddress)
+    {
+        // Require EIP712 signed session
+        require(owners[metaAddress] == auth.user, "Unauthorized user");
+
+        return _computeStealthKey(metaAddress, k, ephemeralPub);
+    }
+
+    function createTransaction(SignIn calldata auth, string calldata metaAddress, uint32 k, bytes calldata ephemeralPub, uint64 nonce, uint256 gasPrice, uint chainId)
+        public view
+        authenticated(auth)
         returns (bytes memory)
     {
+        // Require EIP712 signed session
+        require(owners[metaAddress] == auth.user, "Unauthorized user");
+
         EIP155Signer.EthTx memory unsignedTx = EIP155Signer.EthTx({
             nonce: nonce,
             gasPrice: gasPrice,
@@ -190,7 +334,7 @@ contract StealthSigner {
             chainId: chainId == 0x0 ? block.chainid : chainId
         });
 
-        (bytes32 stealthKey, address stealthAddress) = computeStealthKey(k, ephemeralPub);
+        (bytes32 stealthKey, address stealthAddress) = _computeStealthKey(metaAddress, k, ephemeralPub);
 
         return EIP155Signer.sign(stealthAddress, stealthKey, unsignedTx);
     }
