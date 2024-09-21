@@ -7,4 +7,4 @@ export const getNextAliasKey = async () => {
   const nextAliasKey = allUserAliasCount + 1;
 
   return nextAliasKey;
-}
+};

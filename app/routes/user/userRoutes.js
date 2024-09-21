@@ -137,5 +137,9 @@ export const userRoutes = (app, _, done) => {
     }
   );
 
+  app.get("/total-balance", async (req, reply) => {
+    return;
+  });
+
   done();
 };
