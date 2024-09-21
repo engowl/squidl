@@ -1,9 +1,10 @@
 import { Button } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TokenSelectionDialog from "../dialogs/TokenSelectionDialog.jsx";
 import { useNavigate } from "react-router-dom";
+import { squidlAPI } from "../../api/squidl.js";
 
 export function Transfer() {
   const [amount, setAmount] = useState();
@@ -49,6 +50,12 @@ export function Transfer() {
       e.preventDefault();
     }
   };
+
+  useEffect(() => {
+    squidlAPI.get("/share-identity").then(({ data }) => {
+      console.log({ data });
+    });
+  }, []);
 
   return (
     <div

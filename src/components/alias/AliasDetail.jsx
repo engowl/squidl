@@ -4,10 +4,10 @@ import TxItem from "./TxItem.jsx";
 import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
-
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
       id: "copy",
@@ -36,7 +36,11 @@ export default function AliasDetail() {
 
       {/* Card */}
 
-      <div className="relative w-full h-full">
+      <motion.div
+        layout
+        layoutId="payment-card"
+        className="relative w-full h-full"
+      >
         <img
           src="/assets/card.png"
           alt="card-placeholder"
@@ -70,7 +74,7 @@ export default function AliasDetail() {
             />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="flex gap-4 items-center w-full">
         <Button className="h-16 bg-[#19191B] w-full rounded-[42px] font-bold">

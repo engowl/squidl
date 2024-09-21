@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import { cnm } from "../../../utils/style";
+import { Link } from "react-router-dom";
 
 const paymentLinks = [
   {
@@ -15,6 +17,8 @@ const paymentLinks = [
   },
 ];
 
+const MotionLink = motion.create(Link);
+
 export default function PaymentLinks() {
   return (
     <div className="w-full rounded-3xl bg-neutral-50 pb-6">
@@ -26,7 +30,10 @@ export default function PaymentLinks() {
       </div>
       <div className="w-full flex flex-col mt-5 px-6">
         {paymentLinks.map((link, idx) => (
-          <div
+          <MotionLink
+            layout
+            layoutId="payment-card"
+            to={"/test/detail"}
             className={cnm(
               "rounded-xl h-[269px] w-full",
               link.colorClassname,
@@ -37,7 +44,7 @@ export default function PaymentLinks() {
               <p className="font-medium">{link.name}</p>
               <p>${(293912).toLocaleString("en-US")}</p>
             </div>
-          </div>
+          </MotionLink>
         ))}
       </div>
     </div>
