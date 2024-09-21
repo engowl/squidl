@@ -113,13 +113,16 @@ export async function handleQuery({
     }
   }
 
+  console.log('res:', res)
 
   return {
     ttl: 1000,
     result: encodeFunctionResult({
       abi: [abiItem],
       functionName: functionName,
-      result: res
+      result: {
+        data: res,
+      }
     })
   }
 

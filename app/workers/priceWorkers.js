@@ -181,8 +181,12 @@ export const priceWorker = (app, _, done) => {
 
   // Run the worker every 5 minutes
   cron.schedule('*/30 * * * *', async () => {
-    console.log('Running price worker...')
-    fetchCommonTokenPrices()
+    try {
+      console.log('Running price worker...')
+      fetchCommonTokenPrices()
+    } catch (error) {
+      console.log('Error while running price worker', error)
+    }
   })
 
 
@@ -235,9 +239,13 @@ export const priceWorker = (app, _, done) => {
   }
 
   // Run the worker every 15 minutes
-  cron.schedule('*/30 * * * *', async () => {
-    console.log('Running whitelisted multichain token worker...')
-    fetchWhitelistedMultichainToken()
+  cron.schedule('*/40 * * * *', async () => {
+    try {
+      console.log('Running whitelisted multichain token worker...')
+      fetchWhitelistedMultichainToken()
+    } catch (error) {
+      console.log('Error while running whitelisted multichain token worker', error)
+    }
   })
 
   done()

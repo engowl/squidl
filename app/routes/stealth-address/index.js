@@ -2,8 +2,9 @@ import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
 import { dnsDecodeName, handleQuery, resolverAbi, schema } from "../../utils/ensUtils.js";
-import { concat, decodeFunctionData, encodeAbiParameters, encodePacked, isAddress, isHex, keccak256, recoverAddress, toHex } from "viem";
+import { concat, decodeFunctionData, encodeAbiParameters, encodeFunctionResult, encodePacked, isAddress, isHex, keccak256, recoverAddress, toHex } from "viem";
 import { privateKeyToAccount, sign } from "viem/accounts";
+import { ZERO_ADDRESS } from "thirdweb";
 
 /**
  *
@@ -108,7 +109,7 @@ export const stealthAddressRoutes = (app, _, done) => {
         data: data.replace('.json', '')
       });
 
-      console.log('decodedResolveCall', decodedResolveCall)
+      // console.log('decodedResolveCall', decodedResolveCall)
 
       const name = dnsDecodeName(decodedResolveCall.args[0]);
       console.log('name:', name) // e.g. user.squidl.eth
@@ -116,11 +117,87 @@ export const stealthAddressRoutes = (app, _, done) => {
       const alias = name.split('.')[name.split('.').length - 3];
       console.log('alias:', alias)
 
-      const { result, ttl } = await handleQuery({
-        dnsEncodedName: decodedResolveCall.args[0],
-        encodedResolveCall: decodedResolveCall.args[1],
-        env: null
+      // const { result, ttl } = await handleQuery({
+      //   dnsEncodedName: decodedResolveCall.args[0],
+      //   encodedResolveCall: decodedResolveCall.args[1],
+      //   env: null
+      // }).catch((error) => {
+      //   console.error(error)
+      // })
+
+      // Decode the internal resolve call like addr(), text() or contenthash()
+      const { functionName, args } = decodeFunctionData({
+        abi: resolverAbi,
+        data: decodedResolveCall.args[1],
       })
+
+
+      // We need to find the correct ABI item for each function, otherwise `addr(node)` and `addr(node, coinType)` causes issues
+      const abiItem = resolverAbi.find(
+        (abi) => abi.name === functionName && abi.inputs.length === args.length
+      )
+      console.log('abiItem:', abiItem)
+
+      if(!abiItem) {
+        throw new Error(`Unsupported query function ${functionName}`);
+      }
+
+      // const randomWallet = ethers.Wallet.createRandom().address
+      // res = randomWallet
+
+      const randomWallet = ethers.Wallet.createRandom().address
+      const nameData = {
+        address: randomWallet,
+        texts: {
+          url: 'https://test.com'
+        }
+      }
+
+      let res;
+
+      switch (functionName) {
+        // case 'addr': {
+        //   const coinType = args[1] ?? BigInt(60); // Default coinType to 60 (ETH)
+        //   res = nameData?.address ?? ZERO_ADDRESS; // Resolve the address or return ZERO_ADDRESS if not available
+        //   break;
+        // }
+        case 'text': {
+          const key = args[1];
+          if (key === 'url') {
+            res = nameData?.texts?.url ?? 'https://test.com'; // Resolve the 'url' key, defaulting to 'https://test.com'
+          } else {
+            res = nameData?.texts?.[key] ?? 'testing'; // Handle other text keys
+          }
+          break;
+        }
+        // case 'contenthash': {
+        //   res = nameData?.contenthash ?? '0x'; // Resolve the contenthash or return '0x' if not available
+        //   break;
+        // }
+        default: {
+          throw new Error(`Unsupported query function ${functionName}`);
+        }
+      }
+
+      console.log('res:', res)
+
+      // return {
+      //   ttl: 1000,
+      //   result: encodeFunctionResult({
+      //     abi: [abiItem],
+      //     functionName: functionName,
+      //     result: {
+      //       data: res,
+      //     }
+      //   })
+      // }
+      const result = encodeFunctionResult({
+        abi: [abiItem],
+        functionName: functionName,
+        result: res
+      });
+
+      const ttl = 1000
 
       const validUntil = Math.floor(Date.now() / 1000 + ttl)
 
@@ -144,9 +221,9 @@ export const stealthAddressRoutes = (app, _, done) => {
         hash: messageHash,
         privateKey: process.env.ENS_RESOLVER_PK,
       })
-      console.log('sig:', sig)
+      // console.log('sig:', sig)
       const sigData = concat([sig.r, sig.s, toHex(sig.v)]);
-      console.log('sigData:', sigData)
+      // console.log('sigData:', sigData)
 
       const encodedResponse = encodeAbiParameters(
         [
@@ -157,7 +234,7 @@ export const stealthAddressRoutes = (app, _, done) => {
         [result, BigInt(validUntil), sigData]
       )
 
-      console.log('encodedResponse:', encodedResponse)
+      // console.log('encodedResponse:', encodedResponse)
 
       // Try to verify the signature
       // const signer = ethers.verifyMessage(messageHash, sigData)
@@ -170,18 +247,15 @@ export const stealthAddressRoutes = (app, _, done) => {
       });
       console.log('Recovered signer address:', recoveredAddress);
 
-      return { data: encodedResponse }
+      return { data: encodedResponse };
     } catch (error) {
       console.error(error)
       return {
-        data: error?.message || null,
+        error: error.message,
+        data: null,
+        message: "error while resolving sender"
       }
-      // return {
-      //   error: error.message,
-      //   data: null,
-      //   message: "error while resolving alias"
-      // }
-    }
+    } 
   });
 
   // POST /tx/withdraw, to generate the transactions for the withdrawal of the funds

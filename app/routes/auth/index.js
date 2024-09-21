@@ -5,6 +5,7 @@ import {
   getUserJwtData,
 } from "../../lib/middlewares/authMiddleware.js";
 import { verifyFields } from "../../utils/request.js";
+import { getNextAliasKey } from "../stealth-address/helpers/aliasHelpers.js";
 
 /**
  *
@@ -28,6 +29,8 @@ export const authRoutes = (app, _, done) => {
 
       console.log({ existingUser });
       if (!existingUser) {
+        const nextAliasKey = await getNextAliasKey();
+        
         const createdUser = await prismaClient.$transaction(async (prisma) => {
           const createdUser = await prisma.user.create({
             data: {
@@ -43,6 +46,7 @@ export const authRoutes = (app, _, done) => {
                 },
               },
               alias: "",
+              key: nextAliasKey,
             },
           });
           return createdUser;

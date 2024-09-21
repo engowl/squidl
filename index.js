@@ -8,12 +8,13 @@ import fastifyMultipart from "@fastify/multipart";
 import { authRoutes } from "./app/routes/auth/index.js";
 import { stealthAddressRoutes } from "./app/routes/stealth-address/index.js";
 import { priceWorker } from "./app/workers/priceWorkers.js";
+import { stealthSignerGenerateStealthAddress } from "./app/lib/contracts/oasis/oasisContract.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({
-  logger: true
+  logger: false
 });
 
 fastify.register(FastifyCors, {

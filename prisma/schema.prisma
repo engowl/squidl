@@ -44,6 +44,8 @@ model User {
 model UserAlias {
   id String @id @default(cuid())
 
+  key    Int    @unique
+  
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
@@ -109,18 +111,18 @@ model CommonTokenPrice {
 model OneInchTokenList {
   id String @id @default(cuid())
 
-  address  String
-  chainId  Int
+  address String
+  chainId Int
 
   name     String
   symbol   String
   decimals Int
   logoURI  String?
 
-  @@unique([chainId, address])
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([chainId, address])
 }
 
 model Transaction {
