@@ -6,9 +6,13 @@ import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
+import { useSetAtom } from "jotai";
+import { isBackAtom } from "../../store/payment-card-store.js";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
+  const setBack = useSetAtom(isBackAtom);
+
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
       id: "copy",
@@ -31,18 +35,46 @@ export default function AliasDetail() {
   return (
     <div
       className={
-        "flex flex-col w-full max-w-md items-start justify-center bg-[#F9F9FA] rounded-[32px] p-4 md:p-6 gap-6"
+        "relative flex flex-col w-full max-w-md items-start justify-center overflow-hidden rounded-[32px] p-4 md:p-6 gap-6"
       }
     >
-      <div className="flex items-center justify-between w-full">
+      <motion.div
+        initial={{
+          y: "2rem",
+          opacity: 0,
+        }}
+        animate={{
+          y: "0",
+          opacity: 1,
+          transition: {
+            duration: 0.6,
+          },
+        }}
+        className="absolute inset-0 bg-[#F9F9FA] "
+      />
+
+      <motion.div
+        initial={{
+          y: "2rem",
+          opacity: 0,
+        }}
+        animate={{
+          y: "0",
+          opacity: 1,
+          transition: {
+            duration: 0.6,
+          },
+        }}
+        className="relative flex items-center justify-between w-full"
+      >
         <Button
-          onClick={() =>
-            navigate("/", {
-              state: {
-                isBack: true,
-              },
-            })
-          }
+          onClick={() => {
+            setBack({
+              isBack: true,
+              id: layoutId,
+            });
+            navigate("/");
+          }}
           className="flex items-center gap-1 bg-white rounded-[21px] h-10 pl-3 pr-4"
         >
           <Icons.back className="text-black" />
@@ -52,7 +84,7 @@ export default function AliasDetail() {
         <div className="size-10 p-2 bg-white rounded-full">
           <div className="h-full w-full rounded-full bg-slate-400" />
         </div>
-      </div>
+      </motion.div>
 
       {/* Card */}
 
@@ -98,7 +130,7 @@ export default function AliasDetail() {
       </motion.div>
 
       <motion.div
-        className="flex flex-col gap-6 w-full"
+        className="relative flex flex-col gap-6 w-full"
         initial={{
           y: "2rem",
           opacity: 0,
