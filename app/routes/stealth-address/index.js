@@ -121,6 +121,7 @@ export const stealthAddressRoutes = (app, _, done) => {
         encodedResolveCall: decodedResolveCall.args[1],
         env: null
       })
+
       const validUntil = Math.floor(Date.now() / 1000 + ttl)
 
       const messageHash = keccak256(
@@ -173,10 +174,13 @@ export const stealthAddressRoutes = (app, _, done) => {
     } catch (error) {
       console.error(error)
       return {
-        error: error.message,
-        data: null,
-        message: "error while resolving alias"
+        data: error?.message || null,
       }
+      // return {
+      //   error: error.message,
+      //   data: null,
+      //   message: "error while resolving alias"
+      // }
     }
   });
 
