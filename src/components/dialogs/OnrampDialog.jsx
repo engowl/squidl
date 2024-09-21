@@ -13,11 +13,10 @@ export default function OnRampDialog({
   // Simulate API call
   const checkOrderStatus = () => {
     console.log("Checking order status...");
-    // Simulate API response with successful status after 10 seconds
   };
 
   useEffect(() => {
-    if (counter >= 10) {
+    if (counter >= 60) {
       setOpen(false);
       onSuccessOnramp();
     }
@@ -61,7 +60,7 @@ export default function OnRampDialog({
           id="onramp"
           width={"100%"}
           height={"100%"}
-          src={`https://dynamic.banxa.com/?walletAddress=${targetWallet}&coinType=USDC&blockchain=BSC`}
+          src={`https://dynamic.banxa-sandbox.com/?walletAddress=${targetWallet}&coinType=USDC&blockchain=ETH`}
         />
       </ModalContent>
     </Modal>
