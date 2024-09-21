@@ -49,7 +49,7 @@ export default function SuccessDialog({
               onClick={() => setOpen(false)}
               className="bg-[#F8F8F8] rounded-full p-3"
             >
-              <Icons.close classNamet="text-black size-6" />
+              <Icons.close className="text-black size-6" />
             </button>
           </div>
 

@@ -10,7 +10,6 @@ import BalanceChart from "./BalanceChart";
 import { useAtomValue } from "jotai";
 import { isBackAtom } from "../../../store/payment-card-store";
 import { Fingerprint, Handshake, Lock } from "lucide-react";
-import CreateLinkDialog from "../../dialogs/CreateLinkDialog.jsx";
 import QrDialog from "../../dialogs/QrDialog.jsx";
 import PaymentLinksDashboard from "./PaymentLinksDashboard.jsx";
 import useSWR from "swr";
@@ -39,8 +38,6 @@ export default function Dashboard() {
 
   return (
     <>
-      <CreateLinkDialog />
-
       <QrDialog
         open={openQr}
         setOpen={setOpenQr}

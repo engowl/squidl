@@ -79,8 +79,8 @@ export default function AliasDetail() {
           <p className="font-bold text-sm text-[#19191B]">Back</p>
         </Button>
 
-        <div className="size-10 p-2 bg-white rounded-full">
-          <div className="h-full w-full rounded-full bg-slate-400" />
+        <div className="size-10 p-2 bg-white rounded-full flex items-center justify-center">
+          <Icons.allChain className="text-black" />
         </div>
       </motion.div>
 

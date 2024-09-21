@@ -30,7 +30,7 @@ const confettiConfig = {
   perspective: "500px", // Perspective value for 3D effect
 };
 
-export default function CreateLinkDialog({ onSuccess }) {
+export default function CreateLinkDialog() {
   const [isOpen, setOpen] = useAtom(isCreateLinkDialogAtom);
   const [step, setStep] = useState("one");
   const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
@@ -51,7 +51,7 @@ export default function CreateLinkDialog({ onSuccess }) {
           onClick={() => setOpen(false)}
           className="absolute right-4 top-4 bg-[#F8F8F8] rounded-full p-3"
         >
-          <Icons.close classNamet="text-black size-6" />
+          <Icons.close className="text-black size-6" />
         </button>
 
         {step === "one" ? (

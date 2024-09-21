@@ -1,5 +1,6 @@
 import { shortenId } from "../../utils/FormattingUtils.js";
 import TxItem from "../alias/TxItem.jsx";
+import { Icons } from "../shared/Icons.jsx";
 
 export default function Transactions() {
   return (
@@ -10,8 +11,8 @@ export default function Transactions() {
     >
       <div className="flex items-center justify-between w-full">
         <h1 className="font-bold text-lg text-[#19191B]">Transactions</h1>
-        <div className="size-10 p-2 bg-white rounded-full">
-          <div className="h-full w-full rounded-full bg-slate-400" />
+        <div className="size-10 p-2 bg-white rounded-full flex items-center justify-center">
+          <Icons.allChain className="text-black" />
         </div>
       </div>
 
