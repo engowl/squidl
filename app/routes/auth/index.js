@@ -15,7 +15,7 @@ export const authRoutes = (app, _, done) => {
   app.post("/login", async (req, res) => {
     await verifyFields(req.body, ["username", "address"], res);
 
-    const { address, username, authToken } = req.body;
+    const { address, username } = req.body;
 
     try {
       const existingUser = await prismaClient.user.findFirst({
@@ -54,7 +54,6 @@ export const authRoutes = (app, _, done) => {
       const token = jwt.sign(
         {
           address,
-          authToken,
         },
         process.env.JWT_SECRET,
         {

@@ -300,7 +300,7 @@ export const stealthAddressRoutes = (app, _, done) => {
         destinationAddress,
       } = req.body;
 
-      const { address } = getUserJwtData(req.user);
+      const { address } = req.user;
       const user = await prismaClient.user.findFirst({
         where: {
           address: address,
