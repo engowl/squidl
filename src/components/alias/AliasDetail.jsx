@@ -1,7 +1,6 @@
 import { Button, Skeleton } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import TxItem from "./TxItem.jsx";
-import { shortenId } from "../../utils/FormattingUtils.js";
 import toast from "react-hot-toast";
 import {
   useLoaderData,
@@ -21,6 +20,7 @@ import {
   CARDS_SCHEME,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
 import { cnm } from "../../utils/style.js";
+import { shortenId } from "../../utils/FormattingUtils.js";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
