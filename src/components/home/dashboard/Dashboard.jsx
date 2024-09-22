@@ -41,8 +41,6 @@ export default function Dashboard() {
 
   const { provider, signer } = useWeb3();
 
-  console.log({ provider });
-
   const isBackValue = useAtomValue(isBackAtom);
 
   const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
@@ -118,7 +116,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
     isValidating,
   } = useSWR(
     user
-      ? `/stealth-address/address/new-address?fullAlias=${user.username}.squidl.eth&isTestnet=true`
+      ? `/stealth-address/address/new-address?fullAlias=${user?.username}.squidl.eth&isTestnet=true`
       : null,
     async (url) => {
       const { data } = await squidlAPI.get(url);
@@ -131,7 +129,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
 
   const onCopy = (text) => {
     navigator.clipboard.writeText(
-      mode === "ens" ? `${user.username}.squidl.me` : `${user.address}`
+      mode === "ens" ? `${user?.username}.squidl.me` : `${user?.address}`
     );
     toast.success("Copied to clipboard", {
       duration: 1000,
@@ -186,7 +184,7 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
                 <p>{shortenAddress(randomAddress)}</p>
               )
             ) : (
-              <p>{user.username}.squidl.me</p>
+              <p>{user?.username}.squidl.me</p>
             )}
           </>
         )}

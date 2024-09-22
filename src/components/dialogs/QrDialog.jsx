@@ -94,7 +94,7 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
 
               <QRCode
                 ref={qrRef}
-                value={`${user.username}.squidl.me`}
+                value={`${user?.username}.squidl.me`}
                 qrStyle="dots"
                 logoImage="/assets/nouns.png"
                 logoWidth={30}
@@ -108,7 +108,7 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
 
             <div className="flex flex-row items-center gap-2.5 mt-3">
               <h1 className="font-medium text-lg text-[#F4F4F4]">
-                {user.username}.squidl.me
+                {user?.username}.squidl.me
               </h1>
               <button onClick={() => onCopy("link")}>
                 <Icons.copy className="text-[#B9BCFF]" />

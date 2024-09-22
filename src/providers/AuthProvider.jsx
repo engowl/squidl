@@ -25,13 +25,15 @@ export default function AuthProvider({ children }) {
       })
       .then(async ({ data }) => {
         console.log({ data }, "ON LOGINNN");
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("auth_signer", auth);
         if (!data.user.username) {
           return setOpen(true);
         }
-        localStorage.setItem("access_token", data.access_token);
       })
-      .catch(() => {
-        handleLogOut();
+      .catch((e) => {
+        console.log(e, "error while login");
+        // handleLogOut();
       });
     console.log({
       user,
