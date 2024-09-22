@@ -13,20 +13,20 @@ export default function AuthProvider({ children }) {
   const { signer, provider, isLoaded, contract } = useWeb3();
 
   async function login(params) {
+    let auth;
     const network = await provider.getNetwork();
     const chainId = network.chainId;
-    const auth = await signAuthToken(signer, CONTRACT_ADDRESS, chainId);
+    auth = await signAuthToken(signer, CONTRACT_ADDRESS, chainId);
 
     squidlAPI
       .post("/auth/login", {
         address: user.verifiedCredentials[0].address,
         username: "",
-        authToken: auth,
       })
       .then(async ({ data }) => {
         console.log({ data }, "ON LOGINNN");
         localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("auth_signer", auth);
+        localStorage.setItem("auth_signer", JSON.stringify(auth));
         if (!data.user.username) {
           return setOpen(true);
         }
@@ -35,6 +35,7 @@ export default function AuthProvider({ children }) {
         console.log(e, "error while login");
         // handleLogOut();
       });
+
     console.log({
       user,
     });

@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { squidlAPI } from "../../api/squidl.js";
 import { useUserWallets } from "@dynamic-labs/sdk-react-core";
+import { useWeb3 } from "../../providers/Web3Provider.jsx";
 
 const confettiConfig = {
   angle: 90, // Angle at which the confetti will explode
@@ -73,6 +74,8 @@ export default function CreateLinkDialog() {
 function StepOne({ setStep, isLoading, user }) {
   const [alias, setAlias] = useState("");
 
+  const { contract } = useWeb3();
+
   async function handleUpdate() {
     if (!alias) {
       return toast.error("Please provide an alias");
@@ -85,6 +88,7 @@ function StepOne({ setStep, isLoading, user }) {
     if (alias.length > 15) {
       return toast.error("Alias can't be more than 15 characters");
     }
+    const id = toast.loading("Creating alias address");
 
     try {
       const res = await squidlAPI.post("/stealth-address/aliases/new-alias", {
@@ -94,7 +98,10 @@ function StepOne({ setStep, isLoading, user }) {
       toast.success("Your alias has been created!");
       setStep("two");
     } catch (e) {
+      console.log(e);
       toast.error("Error creating your alias");
+    } finally {
+      toast.dismiss(id);
     }
   }
   return (
@@ -134,7 +141,7 @@ function StepOne({ setStep, isLoading, user }) {
           <Skeleton className="w-25 h-6" />
         ) : (
           <p className="absolute right-4 text-neutral-400">
-            .{user.username}.squidl.me
+            .{user?.username}.squidl.me
           </p>
         )}
       </div>

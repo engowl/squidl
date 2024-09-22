@@ -1,4 +1,4 @@
-import { Button, Skeleton } from "@nextui-org/react";
+import { Button, Skeleton, Tooltip } from "@nextui-org/react";
 import { Icons } from "../shared/Icons.jsx";
 import TxItem from "./TxItem.jsx";
 import toast from "react-hot-toast";
@@ -9,7 +9,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSetAtom } from "jotai";
 import { isBackAtom } from "../../store/payment-card-store.js";
 import { useUserWallets } from "@dynamic-labs/sdk-react-core";
@@ -22,6 +22,8 @@ import {
 import { cnm } from "../../utils/style.js";
 import { shortenId } from "../../utils/formatting-utils.js";
 import SquidLogo from "../../assets/squidl-logo.svg?react";
+import { shortenAddress } from "../../utils/string.js";
+import { useWeb3 } from "../../providers/Web3Provider.jsx";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ export default function AliasDetail() {
   const [searchParams] = useSearchParams();
   const scheme = searchParams.get("scheme");
 
+  const { contract } = useWeb3();
   console.log(fullAlias);
 
   const layoutId = `payment-card-${alias}-${parent}`;
@@ -54,21 +57,35 @@ export default function AliasDetail() {
     return data;
   });
 
-  const {
-    data: aliasAddress,
-    isLoading: loadingAlias,
-    mutate,
-    isValidating,
-  } = useSWR(
-    user
-      ? `/stealth-address/address/new-address?fullAlias=${user.username}.squidl.eth&isTestnet=true`
-      : null,
-    async (url) => {
-      const { data } = await squidlAPI.get(url);
-      console.log({ data });
-      return data.address;
+  const [aliasAddress, setAliasAddress] = useState(null);
+  const [isLoadingAlias, setLoading] = useState(false);
+
+  async function generateStealthAddress() {
+    setLoading(true);
+    try {
+      const auth = localStorage.getItem("auth_signer");
+      if (!auth) {
+        return toast.error("Signer not available");
+      }
+      const [metaAddress] = await contract.getMetaAddress.staticCall(
+        JSON.parse(auth),
+        0
+      );
+      const [address1, ePub1, tag1] =
+        await contract.generateStealthAddress.staticCall(metaAddress, 0);
+
+      console.log(address1);
+      setAliasAddress(address1);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
     }
-  );
+  }
+
+  useEffect(() => {
+    generateStealthAddress();
+  }, []);
 
   return (
     <div
@@ -208,23 +225,32 @@ export default function AliasDetail() {
         }}
         className="relative bg-white rounded-[30.5px] p-2 flex items-center justify-between w-full"
       >
-        {loadingAlias || isValidating ? (
-          <Skeleton className="flex rounded-full w-20 h-8" />
+        {isLoadingAlias ? (
+          <Skeleton className="flex rounded-full w-32 h-5 ml-4" />
         ) : (
-          <p className="font-medium text-[#19191B] py-2 px-3">{`${shortenAddress(
-            aliasAddress
-          )}`}</p>
+          <Tooltip content={<p>{aliasAddress}</p>}>
+            <p className="font-medium text-[#19191B] py-2 px-3">{`${shortenAddress(
+              aliasAddress
+            )}`}</p>
+          </Tooltip>
         )}
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => mutate()}
+            onClick={() => {
+              generateStealthAddress();
+            }}
             className="bg-[#E9ECFC] rounded-full p-3"
           >
             <Icons.refresh className="text-[#563EEA] size-6" />
           </button>
 
-          <button className="bg-[#E9ECFC] rounded-full p-3">
+          <button
+            onClick={() => {
+              onCopy(aliasAddress);
+            }}
+            className="bg-[#E9ECFC] rounded-full p-3"
+          >
             <Icons.copy className="text-[#563EEA] size-6" />
           </button>
         </div>

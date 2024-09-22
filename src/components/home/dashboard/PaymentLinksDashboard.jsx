@@ -121,7 +121,9 @@ export default function PaymentLinksDashboard({ user }) {
               console.log({ alias });
               const bgImage =
                 AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
-              const userAlias = alias.alias ? alias.alias : user.username;
+              const userAlias = alias.alias
+                ? `${alias.alias}.${user.username}`
+                : user.username;
               const colorScheme = CARDS_SCHEME[idx % CARDS_SCHEME.length];
               return (
                 <motion.button

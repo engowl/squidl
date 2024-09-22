@@ -20,6 +20,7 @@ import { useUserWallets } from "@dynamic-labs/sdk-react-core";
 import Nounsies from "../shared/Nounsies";
 import useSWR from "swr";
 import { useNavigate } from "react-router-dom";
+import { useWeb3 } from "../../providers/Web3Provider";
 
 const confettiConfig = {
   angle: 90,
@@ -62,6 +63,8 @@ function StepOne({ setStep }) {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { contract } = useWeb3();
+
   async function handleUpdate() {
     if (!username) {
       return toast.error("Please provide a username");
@@ -69,16 +72,26 @@ function StepOne({ setStep }) {
 
     setLoading(true);
 
+    let id;
+
     try {
       const res = await squidlAPI.post("/user/update-user", {
         username: username,
       });
       console.log({ res });
-      toast.success("Your username has been created!");
+      id = toast.loading(
+        "Your username has been created!, creating meta address"
+      );
+      const authSigner = localStorage.getItem("auth_signer");
+      const tx = await contract.register(JSON.parse(authSigner));
+      const hash = await tx.wait();
+      console.log({ hash, tx });
+      toast.success("Meta address and username has been created");
       setStep("two");
     } catch (e) {
       toast.error("Error creating your username");
     } finally {
+      toast.dismiss(id);
       setLoading(false);
     }
   }
