@@ -21,9 +21,6 @@ import { sleep } from "../../../utils/process.js";
 import { useNavigate } from "react-router-dom";
 import { mainBalance, privateBalance } from "../../../store/balance-store.js";
 import { useWeb3 } from "../../../providers/Web3Provider.jsx";
-import { signAuthToken } from "../../../lib/ethers.js";
-import { CONTRACT_ADDRESS } from "../../../config.js";
-
 function generateRandomEthAddress() {
   // Generate a random 20-byte hexadecimal string (Ethereum address length is 40 hex characters or 20 bytes)
   const randomBytes = new Uint8Array(20);
@@ -146,10 +143,10 @@ function ReceiveCard({ setOpenQr, user, isLoading }) {
     <div className="bg-purply p-4 rounded-3xl text-white w-full">
       <div className="w-full flex items-center justify-between">
         <p className="text-xl">Receive</p>
-        <div className="bg-purply-800 rounded-full flex relative items-center font-medium">
+        <div className="bg-purply-800 rounded-full flex relative items-center font-medium px-1 py-1">
           <div
             className={cnm(
-              "w-24 h-10 bg-purply-600 absolute left-0 rounded-full transition-transform ease-in-out",
+              "w-24 h-10 bg-purply-600 absolute left-1 rounded-full transition-transform ease-in-out",
               mode === "ens" ? "translate-x-0" : "translate-x-full"
             )}
           ></div>
@@ -236,12 +233,18 @@ function TotalBalance() {
           <div className="bg-neutral-200 rounded-full flex relative items-center font-medium">
             <div
               className={cnm(
-                "w-24 bg-white h-full absolute left-0 rounded-full transition-all ease-in-out",
-                mode === "available"
-                  ? "translate-x-0 bg-white"
-                  : "translate-x-full bg-oasis-blue"
+                "flex items-center justify-center w-24 h-full absolute left-0 rounded-full pl-1 py-1"
               )}
-            ></div>
+            >
+              <div
+                className={cnm(
+                  "flex w-full h-full transition-all ease-in-out rounded-full items-center justify-center",
+                  mode === "available"
+                    ? "translate-x-0 bg-white"
+                    : "translate-x-full bg-oasis-blue"
+                )}
+              ></div>
+            </div>
             <button
               onClick={() => {
                 setMode("available");
@@ -346,7 +349,7 @@ function BalanceMode({ mode }) {
         >
           $
           {mode === "private"
-            ? totalPrivateBalance.toFixed(2).toLocaleString("en-US").to
+            ? totalPrivateBalance.toFixed(2).toLocaleString("en-US")
             : totalMainBalance.toFixed(2).toLocaleString("en-US")}
         </p>
       </div>

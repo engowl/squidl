@@ -20,7 +20,8 @@ import {
   CARDS_SCHEME,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
 import { cnm } from "../../utils/style.js";
-import { shortenAddress } from "../../utils/string.js";
+import { shortenId } from "../../utils/formatting-utils.js";
+import SquidLogo from "../../assets/squidl-logo.svg?react";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -151,7 +152,12 @@ export default function AliasDetail() {
             </h1>
 
             <button onClick={() => onCopy("link")}>
-              <Icons.copy className="text-[#848484] size-4" />
+              <Icons.copy
+                className={cnm(
+                  "size-4",
+                  scheme === "1" ? "text-[#848484]" : "text-white"
+                )}
+              />
             </button>
           </div>
 
@@ -165,14 +171,22 @@ export default function AliasDetail() {
           </h1>
 
           <div className="absolute left-5 bottom-6 flex items-center justify-between">
-            <h1 className="text-[#484B4E] font-bold text-2xl">SQUIDL</h1>
+            <h1
+              className={cnm(
+                "font-bold text-2xl",
+                scheme === "1" ? "text-[#484B4E]" : "text-white"
+              )}
+            >
+              SQUIDL
+            </h1>
           </div>
 
           <div className="absolute right-5 bottom-6 flex items-center justify-between">
-            <img
-              src="/assets/squidl-logo-only.png"
-              alt="logo"
-              className="object-contain w-12 h-16"
+            <SquidLogo
+              className={cnm(
+                "w-12 ",
+                scheme === "1" ? "fill-black" : "fill-white"
+              )}
             />
           </div>
         </div>
@@ -243,7 +257,6 @@ export default function AliasDetail() {
         </div>
 
         {/* Assets */}
-
         <div className="flex flex-col w-full gap-3">
           <h1 className="font-bold text-[#19191B] text-lg">Assets</h1>
 
@@ -253,64 +266,44 @@ export default function AliasDetail() {
               chainImg={"/assets/eth-logo.png"}
               title={"Ethereum"}
               subtitle={"Ethereum"}
-              value={"0.512"}
-              subValue={"$124.29"}
+              value={"0.0011"}
+              subValue={"$1.76"}
             />
 
             <TxItem
-              tokenImg={"/assets/eth-logo.png"}
-              chainImg={"/assets/eth-logo.png"}
-              title={"Ethereum"}
-              subtitle={"Ethereum"}
-              value={"0.512"}
-              subValue={"$124.29"}
-            />
-
-            <TxItem
-              tokenImg={"/assets/eth-logo.png"}
-              chainImg={"/assets/eth-logo.png"}
-              title={"Ethereum"}
-              subtitle={"Ethereum"}
-              value={"0.512"}
-              subValue={"$124.29"}
+              tokenImg={"/assets/usdc-logo.png"}
+              chainImg={"/assets/bsc-logo.png"}
+              title={"USDC"}
+              subtitle={"BSC"}
+              value={"0.007"}
+              subValue={"$7.00"}
             />
           </div>
         </div>
 
         {/* Transactions */}
-
         <div className="flex flex-col w-full gap-3">
           <h1 className="font-bold text-[#19191B] text-lg">Transactions</h1>
           <p className="text-[#A1A1A3] font-medium text-sm mt-1">09/20/2024</p>
           <div className="flex flex-col w-full">
             <TxItem
               tokenImg={"/assets/eth-logo.png"}
-              chainImg={"/assets/eth-logo.png"}
-              title={"Ethereum"}
-              subtitle={`from ${shortenAddress(
+              chainImg={"/assets/line-logo.png"}
+              title={"Receive"}
+              subtitle={`from ${shortenId(
                 "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
               )}`}
-              value={"0.512"}
+              value={"0.0001"}
             />
 
             <TxItem
-              tokenImg={"/assets/eth-logo.png"}
+              tokenImg={"/assets/usdc-logo.png"}
               chainImg={"/assets/eth-logo.png"}
-              title={"Ethereum"}
-              subtitle={`from ${shortenAddress(
-                "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
+              title={"Receive"}
+              subtitle={`from ${shortenId(
+                "0x02919065a8Ef7A782Bb3D9f3DE5ef2FA0a4d1f47"
               )}`}
-              value={"0.512"}
-            />
-
-            <TxItem
-              tokenImg={"/assets/eth-logo.png"}
-              chainImg={"/assets/eth-logo.png"}
-              title={"Ethereum"}
-              subtitle={`from ${shortenAddress(
-                "0x02919065a8Ef7A782Bb3D9f3DEFef2FA0a4d1f37"
-              )}`}
-              value={"0.512"}
+              value={"0.005"}
             />
           </div>
         </div>
