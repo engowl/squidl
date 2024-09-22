@@ -2,12 +2,13 @@ import toast from "react-hot-toast";
 import { Icons } from "../shared/Icons.jsx";
 import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 import { Button } from "@nextui-org/react";
-import { shortenId } from "../../utils/FormattingUtils.js";
+
 import { QRCode } from "react-qrcode-logo";
 import OnRampDialog from "../dialogs/OnrampDialog.jsx";
 import { useState } from "react";
 import SuccessDialog from "../dialogs/SuccessDialog.jsx";
 import Chains from "../shared/Chains.jsx";
+import { shortenId } from "../../utils/FormattingUtils.js";
 
 export default function Payment() {
   const isLoggedIn = useIsLoggedIn();
