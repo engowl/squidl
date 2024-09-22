@@ -20,6 +20,9 @@ import crypto from "crypto";
 import { sleep } from "../../../utils/process.js";
 import { useNavigate } from "react-router-dom";
 import { mainBalance, privateBalance } from "../../../store/balance-store.js";
+import { useWeb3 } from "../../../providers/Web3Provider.jsx";
+import { signAuthToken } from "../../../lib/ethers.js";
+import { CONTRACT_ADDRESS } from "../../../config.js";
 
 function generateRandomEthAddress() {
   // Generate a random 20-byte hexadecimal string (Ethereum address length is 40 hex characters or 20 bytes)
@@ -38,6 +41,10 @@ function generateRandomEthAddress() {
 export default function Dashboard() {
   const { handleLogOut } = useDynamicContext();
   const [openQr, setOpenQr] = useState(false);
+
+  const { provider, signer } = useWeb3();
+
+  console.log({ provider });
 
   const isBackValue = useAtomValue(isBackAtom);
 

@@ -1,5 +1,9 @@
-import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
+import {
+  DynamicContextProvider,
+  mergeNetworks,
+} from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import { customEvmNetworks } from "../config";
 
 export default function DynamicProvider({ children }) {
   return (
@@ -7,6 +11,9 @@ export default function DynamicProvider({ children }) {
       settings={{
         environmentId: import.meta.env.VITE_DYNAMIC_ENV_ID,
         walletConnectors: [EthereumWalletConnectors],
+        overrides: {
+          evmNetworks: (networks) => mergeNetworks(customEvmNetworks, networks),
+        },
       }}
     >
       {children}

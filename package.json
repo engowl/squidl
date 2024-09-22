@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "@dynamic-labs/ethereum": "^3.1.0",
+    "@dynamic-labs/ethers-v6": "^3.1.1",
     "@dynamic-labs/sdk-react-core": "^3.1.0",
     "@nextui-org/react": "^2.4.8",
+    "@oasisprotocol/sapphire-ethers-v6": "^6.0.1",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
+    "ethers": "^6.13.2",
     "framer-motion": "^11.5.5",
     "jotai": "^2.10.0",
     "lucide-react": "^0.443.0",

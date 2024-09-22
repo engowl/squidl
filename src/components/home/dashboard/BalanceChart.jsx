@@ -90,9 +90,7 @@ export default function BalanceChart() {
     // Apply interpolation to fill vertical gaps only (not horizontal)
 
     return { pixelData, gridHeight };
-  }, [containerWidth]);
-
-  console.log({ pixelData });
+  }, []);
 
   if (isLoading) {
     return (
@@ -190,12 +188,9 @@ export default function BalanceChart() {
               className="-translate-x-10"
               shape={(props) => {
                 const { cx, cy, payload } = props;
-                console.log({ cx, cy, payload });
                 const size = GRID_SIZE - 2;
                 const x = Math.floor(cx / GRID_SIZE) * GRID_SIZE;
                 const y = Math.floor(cy / GRID_SIZE) * GRID_SIZE;
-
-                console.log({ x, y });
 
                 const rectangles = [];
                 rectangles.push(
