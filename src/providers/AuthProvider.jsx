@@ -10,7 +10,7 @@ import { signAuthToken } from "../lib/ethers";
 export default function AuthProvider({ children }) {
   const { user, handleLogOut } = useDynamicContext();
   const [, setOpen] = useAtom(isGetStartedDialogAtom);
-  const { signer, provider, isLoaded } = useWeb3();
+  const { signer, provider, isLoaded, contract } = useWeb3();
 
   async function login(params) {
     const network = await provider.getNetwork();
@@ -29,7 +29,6 @@ export default function AuthProvider({ children }) {
           return setOpen(true);
         }
         localStorage.setItem("access_token", data.access_token);
-        console.log({ data }, "from after login");
       })
       .catch(() => {
         handleLogOut();
