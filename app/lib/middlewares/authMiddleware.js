@@ -1,4 +1,5 @@
 import { verifyDynamicToken } from "../dynamic/auth.js";
+import jwt from "jsonwebtoken";
 
 export const authMiddleware = async (request, reply) => {
   try {
@@ -7,16 +8,11 @@ export const authMiddleware = async (request, reply) => {
       return reply.status(401).send({ error: "Authorization header missing" });
     }
     const token = authHeader.split(" ")[1];
-    const decoded = await verifyDynamicToken(token);
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     request.user = decoded;
+    console.log({ decoded });
     return true;
   } catch (err) {
     return reply.status(401).send({ error: "Invalid token" });
   }
-};
-
-export const getUserJwtData = (decodedToken) => {
-  return {
-    address: decodedToken?.verified_credentials[0].address,
-  };
 };

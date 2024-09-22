@@ -18,9 +18,10 @@ export async function verifyDynamicToken(encodedJwt) {
 
     const decodedToken = jwt.verify(encodedJwt, publicKey, {
       ignoreExpiration: false,
+      maxAge: 5 * 86400,
     });
 
-    // console.log({ decodedToken });
+    console.log({ decodedToken });
 
     return decodedToken;
   } catch (e) {

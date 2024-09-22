@@ -1,8 +1,5 @@
 import { prismaClient } from "../../lib/db/prisma.js";
-import {
-  authMiddleware,
-  getUserJwtData,
-} from "../../lib/middlewares/authMiddleware.js";
+import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 
 /**
  *
@@ -20,7 +17,7 @@ export const userRoutes = (app, _, done) => {
   });
 
   app.get("/alias", { preHandler: [authMiddleware] }, async (req, reply) => {
-    const { address } = getUserJwtData(req.user);
+    const { address } = req.user;
     try {
       const userAliases = await prismaClient.userAlias.findMany({
         where: {
@@ -48,7 +45,7 @@ export const userRoutes = (app, _, done) => {
 
       console.log({ alias });
 
-      const { address } = getUserJwtData(req.user);
+      const { address } = req.user;
 
       console.log({ address });
       try {
@@ -98,7 +95,7 @@ export const userRoutes = (app, _, done) => {
 
       console.log({ username });
 
-      const { address } = getUserJwtData(req.user);
+      const { address } = req.user;
 
       try {
         const existingUser = await prismaClient.user.findFirst({

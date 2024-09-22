@@ -1,8 +1,5 @@
 import { ethers } from "ethers";
-import {
-  authMiddleware,
-  getUserJwtData,
-} from "../../lib/middlewares/authMiddleware.js";
+import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
 import { dnsDecodeName, resolverAbi } from "../../utils/ensUtils.js";
 import {
@@ -40,7 +37,7 @@ export const stealthAddressRoutes = (app, _, done) => {
     },
     async (req, res) => {
       try {
-        const { address } = getUserJwtData(req.user);
+        const { address } = req.user;
         const user = await prismaClient.user.findFirst({
           where: {
             address: address,
@@ -71,8 +68,7 @@ export const stealthAddressRoutes = (app, _, done) => {
         for (let i = 0; i < aliases.length; i++) {
           // Random from $100 to $10000, max 2 decimal places
           // TODO: Fetch the actual balance for each alias
-          aliases[i].balanceUsd =
-            Math.floor(Math.random() * 509900 + 100) / 100;
+          aliases[i].balanceUsd = 0;
           // To fetch the overall balance, it will iterate each aliases, and using 1inch Generate Current Value API to get the balance of address collection
         }
 
@@ -135,7 +131,7 @@ export const stealthAddressRoutes = (app, _, done) => {
     },
     async (req, res) => {
       try {
-        const { address } = getUserJwtData(req.user);
+        const { address } = req.user;
         const { alias } = req.body;
 
         const user = await prismaClient.user.findFirst({
