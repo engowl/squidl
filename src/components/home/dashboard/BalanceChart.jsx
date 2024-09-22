@@ -192,6 +192,8 @@ export default function BalanceChart() {
                 const x = Math.floor(cx / GRID_SIZE) * GRID_SIZE;
                 const y = Math.floor(cy / GRID_SIZE) * GRID_SIZE;
 
+                console.log({ x, y });
+
                 const rectangles = [];
                 rectangles.push(
                   <Rectangle

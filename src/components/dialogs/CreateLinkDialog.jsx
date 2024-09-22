@@ -161,6 +161,15 @@ function StepTwo({ user, isLoading, setOpen, setStep }) {
     return () => clearInterval(interval);
   }, []);
 
+  const onCopy = (text) => {
+    toast.success("Copied to clipboard", {
+      id: "copy",
+      duration: 1000,
+      position: "bottom-center",
+    });
+    navigator.clipboard.writeText(text);
+  };
+
   return (
     <>
       <p className="text-2xl font-semibold">Your Payment link is ready!</p>
@@ -218,7 +227,15 @@ function StepTwo({ user, isLoading, setOpen, setStep }) {
         </div>
       </div>
 
-      <Button className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600">
+      <Button
+        onClick={async () => {
+          await navigator.share({
+            title: "Link",
+            text: `reelance.${user.username}.squidl.me`,
+          });
+        }}
+        className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"
+      >
         Start Sharing
       </Button>
       <Button

@@ -96,9 +96,9 @@ export default function QrDialog({ open, setOpen, qrUrl }) {
                 ref={qrRef}
                 value={`${user.username}.squidl.me`}
                 qrStyle="dots"
-                logoImage="/assets/squid-qr.png"
-                logoWidth={40}
-                logoHeight={40}
+                logoImage="/assets/nouns.png"
+                logoWidth={30}
+                logoHeight={30}
                 style={{
                   width: "100%",
                   height: "100%",
