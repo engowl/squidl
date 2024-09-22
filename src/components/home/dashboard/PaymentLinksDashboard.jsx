@@ -122,8 +122,8 @@ export default function PaymentLinksDashboard({ user }) {
               const bgImage =
                 AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
               const userAlias = alias.alias
-                ? `${alias.alias}.${user.username}`
-                : user.username;
+                ? `${alias.alias}.${user?.username}`
+                : user?.username;
               const colorScheme = CARDS_SCHEME[idx % CARDS_SCHEME.length];
               return (
                 <motion.button
@@ -161,7 +161,7 @@ export default function PaymentLinksDashboard({ user }) {
                   >
                     <p className="font-medium">
                       {alias.alias ? `${alias.alias}.` : ``}
-                      {user.username}
+                      {user?.username}
                       .squidl.me
                     </p>
                     <p>${alias.balanceUsd.toLocaleString("en-US")}</p>

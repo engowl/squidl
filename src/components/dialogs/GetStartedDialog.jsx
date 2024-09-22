@@ -84,8 +84,10 @@ function StepOne({ setStep }) {
       );
       const authSigner = localStorage.getItem("auth_signer");
       const tx = await contract.register(JSON.parse(authSigner));
+
       const hash = await tx.wait();
       console.log({ hash, tx });
+
       toast.success("Meta address and username has been created");
       setStep("two");
     } catch (e) {
@@ -171,7 +173,7 @@ function StepTwo({ setOpen }) {
           {isLoading ? (
             <Skeleton className="w-24 h-8 rounded-md" />
           ) : (
-            <p className="text-xl">{user.username}.squidl.me</p>
+            <p className="text-xl">{user?.username}.squidl.me</p>
           )}
         </div>
         <div className="bg-purply-50 flex-1 flex flex-col justify-end">
@@ -190,7 +192,7 @@ function StepTwo({ setOpen }) {
         onClick={async () => {
           await navigator.share({
             title: "Link",
-            text: `${user.username}.squidl.me`,
+            text: `${user?.username}.squidl.me`,
           });
         }}
         className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"

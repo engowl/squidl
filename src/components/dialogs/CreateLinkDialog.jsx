@@ -204,12 +204,12 @@ function StepTwo({ user, isLoading, setOpen, setStep }) {
                   <Skeleton className="w-25 h-6" />
                 ) : (
                   <p className="text-neutral-200">
-                    freelance.{user.username}.squidl.me
+                    freelance.{user?.username}.squidl.me
                   </p>
                 )}
               </h1>
               <button
-                onClick={() => onCopy(`freelance.${user.username}.squidl.me`)}
+                onClick={() => onCopy(`freelance.${user?.username}.squidl.me`)}
               >
                 <Icons.copy className="text-[#848484] size-4" />
               </button>
@@ -238,7 +238,7 @@ function StepTwo({ user, isLoading, setOpen, setStep }) {
         onClick={async () => {
           await navigator.share({
             title: "Link",
-            text: `reelance.${user.username}.squidl.me`,
+            text: `reelance.${user?.username}.squidl.me`,
           });
         }}
         className="h-16 rounded-full text-white flex items-center justify-center w-full mt-4 bg-purply-600"

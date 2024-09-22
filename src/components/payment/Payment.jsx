@@ -4,16 +4,30 @@ import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 import { Button } from "@nextui-org/react";
 import { QRCode } from "react-qrcode-logo";
 import OnRampDialog from "../dialogs/OnrampDialog.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SuccessDialog from "../dialogs/SuccessDialog.jsx";
 import Chains from "../shared/Chains.jsx";
-import { shortenId } from "../../utils/formatting-utils.js";
+import { shortenAddress } from "../../utils/string.js";
+import { useParams } from "react-router-dom";
+import { useWeb3 } from "../../providers/Web3Provider.jsx";
+import useSWR from "swr";
 
 export default function Payment() {
   const isLoggedIn = useIsLoggedIn();
   const [openOnramp, setOpenOnramp] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
   const { setShowAuthFlow, primaryWallet } = useDynamicContext();
+  const { alias_url } = useParams();
+  const [aliasAddress, setAliasAddress] = useState(null);
+  const [metaAdd, setMetaAdd] = useState(null);
+  const [isLoadingAlias, setLoading] = useState(false);
+
+  const { contract } = useWeb3();
+
+  const { data: user, isLoading } = useSWR("/auth/me", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
 
   const onCopy = (text) => {
     toast.success("Copied to clipboard", {
@@ -40,6 +54,33 @@ export default function Payment() {
 
     setOpenSuccess(true);
   };
+
+  async function generateStealthAddress() {
+    setLoading(true);
+    try {
+      const auth = localStorage.getItem("auth_signer");
+      if (!auth) {
+        return toast.error("Signer not available");
+      }
+      const [metaAddress] = await contract.getMetaAddress.staticCall(
+        JSON.parse(auth),
+        0
+      );
+      const [address1, ePub1, tag1] =
+        await contract.generateStealthAddress.staticCall(metaAddress, 0);
+
+      console.log(address1);
+      setAliasAddress(address1);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    generateStealthAddress();
+  }, []);
 
   return (
     <>
@@ -85,7 +126,7 @@ export default function Payment() {
           <div className="bg-[#563EEA] rounded-3xl mt-7 p-5 flex flex-col items-center justify-center gap-4 w-full">
             <div className="w-full bg-white overflow-hidden p-1 rounded-xl">
               <QRCode
-                value={`jane.squidl.me`}
+                value={`james.squidl.me`}
                 qrStyle="dots"
                 logoImage="/assets/nouns.png"
                 logoHeight={30}
@@ -98,10 +139,8 @@ export default function Payment() {
             </div>
 
             <div className="flex flex-row items-center gap-2.5">
-              <h1 className="font-medium text-lg text-[#F4F4F4]">
-                jane.squidl.me
-              </h1>
-              <button onClick={() => onCopy(`jane.squidl.me`)}>
+              <h1 className="font-medium text-lg text-[#F4F4F4]">{}</h1>
+              <button onClick={() => onCopy(`james.squidl.me`)}>
                 <Icons.copy className="text-[#B9BCFF]" />
               </button>
             </div>
@@ -111,12 +150,10 @@ export default function Payment() {
           <div className="flex flex-col gap-4 mt-4 items-center justify-center w-full">
             <div className="flex bg-white rounded-[30.5px] gap-4 w-full items-center justify-between">
               <h1 className="text-[#19191B] font-medium px-4 py-3">
-                {shortenAddress("0x981F692cF970f169b0779BFeaE5737353DE7a0FD")}
+                {shortenAddress(aliasAddress)}
               </h1>
               <button
-                onClick={() =>
-                  onCopy("0x981F692cF970f169b0779BFeaE5737353DE7a0FD")
-                }
+                onClick={() => onCopy(aliasAddress)}
                 className="flex p-3 bg-[#E9ECFC] rounded-full m-1"
               >
                 <Icons.copy className="text-[#563EEA] size-6" />

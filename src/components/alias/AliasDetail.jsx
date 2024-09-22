@@ -58,6 +58,7 @@ export default function AliasDetail() {
   });
 
   const [aliasAddress, setAliasAddress] = useState(null);
+  const [metaAdd, setMetaAdd] = useState(null);
   const [isLoadingAlias, setLoading] = useState(false);
 
   async function generateStealthAddress() {
@@ -83,8 +84,16 @@ export default function AliasDetail() {
     }
   }
 
+  async function getMetaadd(params) {
+    const authSigner = localStorage.getItem("auth_signer");
+    const [metaAddress, spendPub, viewingPub] =
+      await contract.getMetaAddress.staticCall(JSON.parse(authSigner), 0);
+    setMetaAdd(metaAddress);
+  }
+
   useEffect(() => {
     generateStealthAddress();
+    getMetaadd();
   }, []);
 
   return (
@@ -168,7 +177,11 @@ export default function AliasDetail() {
               {fullAlias}
             </h1>
 
-            <button onClick={() => onCopy("link")}>
+            <button
+              onClick={async () => {
+                onCopy(`https://squidl.me/payment/${metaAdd}`);
+              }}
+            >
               <Icons.copy
                 className={cnm(
                   "size-4",

@@ -27,7 +27,7 @@ export default function AuthProvider({ children }) {
         console.log({ data }, "ON LOGINNN");
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("auth_signer", JSON.stringify(auth));
-        if (!data.user.username) {
+        if (!data.user?.username) {
           return setOpen(true);
         }
       })

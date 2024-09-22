@@ -46,7 +46,7 @@ export default function PaymentLinks() {
         {aliases && aliases.length > 0 ? (
           aliases.map((alias, idx) => {
             const bgImage = AVAILABLE_CARDS_BG[idx % AVAILABLE_CARDS_BG.length];
-            const userAlias = alias.alias ? alias.alias : user.username;
+            const userAlias = alias.alias ? alias.alias : user?.username;
             const colorScheme = CARDS_SCHEME[idx % CARDS_SCHEME.length];
             return (
               <motion.div
@@ -82,7 +82,7 @@ export default function PaymentLinks() {
                     }`
                   )}
                 >
-                  <p className="font-medium">{`${alias.alias}.${user.username}.squidl.me`}</p>
+                  <p className="font-medium">{`${alias.alias}.${user?.username}.squidl.me`}</p>
                   <p>${(293912).toLocaleString("en-US")}</p>
                 </div>
 
