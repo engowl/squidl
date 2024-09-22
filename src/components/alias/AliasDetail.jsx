@@ -21,6 +21,7 @@ import {
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
 import { cnm } from "../../utils/style.js";
 import { shortenId } from "../../utils/formatting-utils.js";
+import SquidLogo from "../../assets/squidl-logo.svg?react";
 
 export default function AliasDetail() {
   const navigate = useNavigate();
@@ -151,7 +152,12 @@ export default function AliasDetail() {
             </h1>
 
             <button onClick={() => onCopy("link")}>
-              <Icons.copy className="text-[#848484] size-4" />
+              <Icons.copy
+                className={cnm(
+                  "size-4",
+                  scheme === "1" ? "text-[#848484]" : "text-white"
+                )}
+              />
             </button>
           </div>
 
@@ -165,14 +171,22 @@ export default function AliasDetail() {
           </h1>
 
           <div className="absolute left-5 bottom-6 flex items-center justify-between">
-            <h1 className="text-[#484B4E] font-bold text-2xl">SQUIDL</h1>
+            <h1
+              className={cnm(
+                "font-bold text-2xl",
+                scheme === "1" ? "text-[#484B4E]" : "text-white"
+              )}
+            >
+              SQUIDL
+            </h1>
           </div>
 
           <div className="absolute right-5 bottom-6 flex items-center justify-between">
-            <img
-              src="/assets/squidl-logo-only.png"
-              alt="logo"
-              className="object-contain w-12 h-16"
+            <SquidLogo
+              className={cnm(
+                "w-12 ",
+                scheme === "1" ? "fill-black" : "fill-white"
+              )}
             />
           </div>
         </div>
