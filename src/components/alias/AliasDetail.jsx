@@ -20,7 +20,7 @@ import {
   CARDS_SCHEME,
 } from "../home/dashboard/PaymentLinksDashboard.jsx";
 import { cnm } from "../../utils/style.js";
-import { shortenId } from "../../utils/FormattingUtils.js";
+import { shortenId } from "../../utils/formatting-utils.js";
 
 export default function AliasDetail() {
   const navigate = useNavigate();

@@ -8,7 +8,7 @@ import OnRampDialog from "../dialogs/OnrampDialog.jsx";
 import { useState } from "react";
 import SuccessDialog from "../dialogs/SuccessDialog.jsx";
 import Chains from "../shared/Chains.jsx";
-import { shortenId } from "../../utils/FormattingUtils.js";
+import { shortenId } from "../../utils/formatting-utils.js";
 
 export default function Payment() {
   const isLoggedIn = useIsLoggedIn();

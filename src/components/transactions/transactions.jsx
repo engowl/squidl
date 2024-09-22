@@ -1,5 +1,4 @@
-
-import { shortenId } from "../../utils/FormattingUtils.js";
+import { shortenId } from "../../utils/formatting-utils.js";
 import TxItem from "../alias/TxItem.jsx";
 import { Icons } from "../shared/Icons.jsx";
 
