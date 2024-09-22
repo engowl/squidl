@@ -8,6 +8,7 @@ import useSWR from "swr";
 import { squidlAPI } from "../../../api/squidl.js";
 import { isCreateLinkDialogAtom } from "../../../store/dialog-store.js";
 import SquidLogo from "../../../assets/squidl-logo.svg?react";
+import { useEffect } from "react";
 
 export const paymentLinks = [
   {
@@ -46,17 +47,25 @@ export const AVAILABLE_CARDS_BG = [
 export const CARDS_SCHEME = [0, 1, 2, 3];
 
 export default function PaymentLinksDashboard({ user }) {
-  const [, setOpen] = useAtom(isCreateLinkDialogAtom);
+  const [isOpen, setOpen] = useAtom(isCreateLinkDialogAtom);
   const navigate = useNavigate();
   const isBackValue = useAtomValue(isBackAtom);
 
-  const { data: aliases, isLoading } = useSWR(
-    "/stealth-address/aliases",
-    async (url) => {
-      const { data } = await squidlAPI.get(url);
-      return data;
+  const {
+    data: aliases,
+    isLoading,
+    mutate,
+    isValidating,
+  } = useSWR("/stealth-address/aliases", async (url) => {
+    const { data } = await squidlAPI.get(url);
+    return data;
+  });
+
+  useEffect(() => {
+    if (!isOpen) {
+      mutate();
     }
-  );
+  }, [isOpen]);
 
   console.log({ aliases });
 

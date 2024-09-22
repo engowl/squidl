@@ -5,7 +5,7 @@ export default function DynamicProvider({ children }) {
   return (
     <DynamicContextProvider
       settings={{
-        environmentId: "23b6b7de-b73b-4ae8-a65c-4e6f96c8d6f3",
+        environmentId: import.meta.env.VITE_DYNAMIC_ENV_ID,
         walletConnectors: [EthereumWalletConnectors],
       }}
     >
