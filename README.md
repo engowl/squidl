@@ -1,3 +1,17 @@
+<table>
+  <tr>
+    <td align="center"><h2>Important Notice</h2></td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Dear ETHGlobal Judges,</strong><br><br>
+      We will be enhancing our project post-submission while respecting the evaluation process. As we continue to refine our work, we understand the importance of fair evaluation.<br><br>
+      Our original submission is preserved <a href="https://github.com/engowl/squidl/tree/7c66f22088018b704e84e632c2774187915ad2fa">here</a> for fair assessment.<br><br>
+      We're excited to showcase our commitment to innovation and adherence to hackathon guidelines. Thank you for your consideration.
+    </td>
+  </tr>
+</table>
+
 ![squidl-logo](https://github.com/user-attachments/assets/e1034b67-7c7e-419f-b299-09265244b584)
 
 # SQUIDL - Privacy-Focused Payment Platform
