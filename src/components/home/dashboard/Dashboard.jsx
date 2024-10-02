@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { squidlAPI } from "../../../api/squidl";
-import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { cnm } from "../../../utils/style";
 import { Button, Skeleton, Spinner } from "@nextui-org/react";
 import QrCodeIcon from "../../../assets/icons/qr-code.svg?react";
@@ -16,13 +15,11 @@ import useSWR from "swr";
 import { shortenAddress } from "../../../utils/string.js";
 import toast from "react-hot-toast";
 import { Icons } from "../../shared/Icons.jsx";
-import crypto from "crypto";
 import { sleep } from "../../../utils/process.js";
 import { useNavigate } from "react-router-dom";
 import { mainBalance, privateBalance } from "../../../store/balance-store.js";
-import { useWeb3 } from "../../../providers/Web3Provider.jsx";
+
 function generateRandomEthAddress() {
-  // Generate a random 20-byte hexadecimal string (Ethereum address length is 40 hex characters or 20 bytes)
   const randomBytes = new Uint8Array(20);
   window.crypto.getRandomValues(randomBytes);
 
@@ -31,15 +28,11 @@ function generateRandomEthAddress() {
     byte.toString(16).padStart(2, "0")
   ).join("");
 
-  // Return the Ethereum address with '0x' prefix
   return "0x" + randomHex;
 }
 
 export default function Dashboard() {
-  const { handleLogOut } = useDynamicContext();
   const [openQr, setOpenQr] = useState(false);
-
-  const { provider, signer } = useWeb3();
 
   const isBackValue = useAtomValue(isBackAtom);
 

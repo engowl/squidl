@@ -67,10 +67,6 @@ export default function PaymentLinksDashboard({ user }) {
     }
   }, [isOpen]);
 
-  console.log({ aliases });
-
-  console.log(isBackValue);
-
   return (
     <div
       id="payment-links"

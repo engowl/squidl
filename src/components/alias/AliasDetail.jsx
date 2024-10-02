@@ -35,6 +35,7 @@ export default function AliasDetail() {
   const scheme = searchParams.get("scheme");
 
   const { contract } = useWeb3();
+
   console.log(fullAlias);
 
   const layoutId = `payment-card-${alias}-${parent}`;
@@ -179,7 +180,7 @@ export default function AliasDetail() {
 
             <button
               onClick={async () => {
-                onCopy(`https://squidl.me/payment/${metaAdd}`);
+                onCopy(`http://localhost:5173/payment/${metaAdd}`);
               }}
             >
               <Icons.copy

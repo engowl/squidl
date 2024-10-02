@@ -5,11 +5,16 @@ import {
   wrapEthersSigner,
 } from "@oasisprotocol/sapphire-ethers-v6";
 import { ethers } from "ethers";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { CONTRACT_ADDRESS } from "../config";
 import ContractABI from "../abi/StealthSigner.json";
 
-const Web3Context = createContext({});
+const Web3Context = createContext({
+  isLoaded: false,
+  provider: null,
+  signer: null,
+  contract: null,
+});
 
 export const useWeb3 = () => useContext(Web3Context);
 
@@ -20,22 +25,31 @@ export default function Web3Provider({ children }) {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [isLoaded, setLoaded] = useState(null);
+  const isInitiating = useRef(false);
 
   async function init() {
-    console.log("init");
-    const _provider = await getWeb3Provider(primaryWallet);
-    const _signer = await getSigner(primaryWallet);
-    const wrappedProvider = wrapEthersProvider(_provider);
-    const wrappedSigner = wrapEthersSigner(_signer);
-    const contract = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      ContractABI.abi,
-      wrappedSigner
-    );
-    setProvider(wrappedProvider);
-    setSigner(wrappedSigner);
-    setContract(contract);
-    setLoaded(true);
+    if (isInitiating.current) return;
+    isInitiating.current = true;
+    try {
+      const _provider = await getWeb3Provider(primaryWallet);
+      const _signer = await getSigner(primaryWallet);
+      const wrappedProvider = wrapEthersProvider(_provider);
+      const wrappedSigner = wrapEthersSigner(_signer);
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        ContractABI.abi,
+        wrappedSigner
+      );
+      setProvider(wrappedProvider);
+      setSigner(wrappedSigner);
+      setContract(contract);
+      setLoaded(true);
+    } catch (e) {
+      console.error("Error initializing web3 provider", e);
+      setLoaded(false);
+    } finally {
+      isInitiating.current = false;
+    }
   }
 
   useEffect(() => {
