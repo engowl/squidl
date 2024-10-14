@@ -16,7 +16,8 @@
     "db:generate-seed": "npx @snaplet/seed sync",
     "db:seed": "npx tsx prisma/seed/seed.ts",
     "db:reset": "prisma migrate reset --force && prisma db push",
-    "ngrok": "ngrok http 3400"
+    "ngrok": "ngrok http --url=striking-glider-usable.ngrok-free.app 3400",
+    "devtunnel": "devtunnel echo http -p 3400 && devtunnel host -p 3400"
   },
   "keywords": [],
   "author": "",
@@ -46,12 +47,16 @@
     "thirdweb": "^5.57.3",
     "validator": "^13.12.0",
     "viem": "^2.21.3",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@chainlink/ccip-read-server": "^0.2.1",
+    "@chainlink/ethers-ccip-read-provider": "^0.2.3",
+    "@ensdomains/ens-contracts": "^0.0.8",
+    "@ensdomains/offchain-resolver-contracts": "^0.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
     "@types/validator": "^13.12.1",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "nodemon": "^3.1.4",
     "prisma": "^5.19.0",
     "ts-node": "^10.9.2",

@@ -55,11 +55,6 @@ fastify.register(userRoutes, {
 /* --------------------------------- Workers -------------------------------- */
 // fastify.register(priceWorker);
 
-oneInchGetGeneralValue({
-  chainIds: [1, 137],
-  addresses: ['0x278A2d5B5C8696882d1D2002cE107efc74704ECf']
-})
-
 const start = async () => {
   try {
     const port = process.env.APP_PORT || 3205;

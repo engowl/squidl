@@ -1,24 +1,10 @@
 import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
-import { dnsDecodeName, resolverAbi } from "../../utils/ensUtils.js";
-import {
-  concat,
-  decodeFunctionData,
-  encodeAbiParameters,
-  encodeFunctionResult,
-  encodePacked,
-  isAddress,
-  isHex,
-  keccak256,
-  recoverAddress,
-  toHex,
-} from "viem";
-import { sign } from "viem/accounts";
+import { dnsDecodeName, handleQuery, OffchainResolverAbi } from "../../utils/ensUtils.js";
 import { getNextAliasKey } from "./helpers/aliasHelpers.js";
 import { prismaClient } from "../../lib/db/prisma.js";
 import {
-  OASIS_CONTRACT,
   stealthSignerGenerateStealthAddress,
 } from "../../lib/contracts/oasis/oasisContract.js";
 
@@ -343,172 +329,47 @@ export const stealthAddressRoutes = (app, _, done) => {
     }
   );
 
-  // ENS RESOLVERS!
   app.get("/aliases/resolve/*", async (request, reply) => {
     try {
-      // const { sender, data } = request.params;
-
-      // make stealth-address/aliases/resolve/:sender/:data
-
       const urlParts = request.url.split("/");
-
       const [sender, data] = urlParts.slice(-2);
-      console.log({
-        sender,
-        data,
-      });
 
-      // Convert sender to address,
-      // Convert data to hex
-      if (isAddress(sender) === false) {
+      const dataWithoutJson = data.replace(".json", "");
+
+      if (!ethers.isAddress(sender)) {
         throw new Error("Invalid sender address");
-      } else if (isHex(data.replace(".json", "")) === false) {
+      } else if (!ethers.isHexString(dataWithoutJson)) {
         throw new Error("Invalid data");
       }
 
-      const decodedResolveCall = decodeFunctionData({
-        abi: resolverAbi,
-        data: data.replace(".json", ""),
-      });
+      const iface = new ethers.Interface(OffchainResolverAbi);
+      const decodedResolveCall = iface.decodeFunctionData("resolve", dataWithoutJson);
 
-      // console.log('decodedResolveCall', decodedResolveCall)
-
-      const name = dnsDecodeName(decodedResolveCall.args[0]);
-      console.log("name:", name); // e.g. user.squidl.eth
-
+      const name = dnsDecodeName(decodedResolveCall[0]);
       const alias = name.split(".")[name.split(".").length - 3];
-      console.log("alias:", alias);
 
-      // const { result, ttl } = await handleQuery({
-      //   dnsEncodedName: decodedResolveCall.args[0],
-      //   encodedResolveCall: decodedResolveCall.args[1],
-      //   env: null
-      // }).catch((error) => {
-      //   console.error(error)
-      // })
+      // Random resolved address
+      const resolvedAddress = ethers.Wallet.createRandom().address;
 
-      // Decode the internal resolve call like addr(), text() or contenthash()
-      const { functionName, args } = decodeFunctionData({
-        abi: resolverAbi,
-        data: decodedResolveCall.args[1],
-      });
-
-      // We need to find the correct ABI item for each function, otherwise `addr(node)` and `addr(node, coinType)` causes issues
-      const abiItem = resolverAbi.find(
-        (abi) => abi.name === functionName && abi.inputs.length === args.length
-      );
-      console.log("abiItem:", abiItem);
-
-      if (!abiItem) {
-        throw new Error(`Unsupported query function ${functionName}`);
-      }
-
-      // const randomWallet = ethers.Wallet.createRandom().address
-      // res = randomWallet
-
-      const randomWallet = ethers.Wallet.createRandom().address;
-      const nameData = {
-        address: randomWallet,
-        texts: {
-          url: "https://test.com",
-        },
-      };
-
-      let res;
-
-      switch (functionName) {
-        // case 'addr': {
-        //   const coinType = args[1] ?? BigInt(60); // Default coinType to 60 (ETH)
-        //   res = nameData?.address ?? ZERO_ADDRESS; // Resolve the address or return ZERO_ADDRESS if not available
-        //   break;
-        // }
-        case "text": {
-          const key = args[1];
-          if (key === "url") {
-            res = nameData?.texts?.url ?? "https://test.com"; // Resolve the 'url' key, defaulting to 'https://test.com'
-          } else {
-            res = nameData?.texts?.[key] ?? "testing"; // Handle other text keys
+      const result = await handleQuery({
+        dnsEncodedName: decodedResolveCall[0],
+        encodedResolveCall: decodedResolveCall[1],
+        sender: sender,
+        contractAddress: process.env.RESOLVER_CONTRACT_ADDRESS,
+        resolvedAddress: resolvedAddress,
+        nameData: {
+          name: name,
+          address: resolvedAddress,
+          display: dnsDecodeName(decodedResolveCall[0]),
+          records: {
+            name: name,
+            description: "This is a test description",
+            url: `https://${alias}.squidl.eth`,
           }
-          break;
         }
-        // case 'contenthash': {
-        //   res = nameData?.contenthash ?? '0x'; // Resolve the contenthash or return '0x' if not available
-        //   break;
-        // }
-        default: {
-          throw new Error(`Unsupported query function ${functionName}`);
-        }
-      }
-
-      console.log("res:", res);
-
-      // return {
-      //   ttl: 1000,
-      //   result: encodeFunctionResult({
-      //     abi: [abiItem],
-      //     functionName: functionName,
-      //     result: {
-      //       data: res,
-      //     }
-      //   })
-      // }
-      const result = encodeFunctionResult({
-        abi: [abiItem],
-        functionName: functionName,
-        result: res,
       });
 
-      const ttl = 1000;
-
-      const validUntil = Math.floor(Date.now() / 1000 + ttl);
-
-      const messageHash = keccak256(
-        encodePacked(
-          ["bytes", "address", "uint64", "bytes32", "bytes32"],
-          [
-            "0x1900", // This is hardcoded in the contract but idk why
-            sender, // target: The address the signature is for.
-            BigInt(validUntil), // expires: The timestamp at which the response becomes invalid.
-            keccak256(data), // request: The original request that was sent.
-            keccak256(result), // result: The `result` field of the response (not including the signature part).
-          ]
-        )
-      );
-
-      // const account = privateKeyToAccount(`0x35ecaf3dc46d80f17b3cdcd5248b119c7c39f5135e04b1bdfa42e897f7bb0903`)
-      // console.log('account:', account)
-
-      const sig = await sign({
-        hash: messageHash,
-        privateKey: process.env.ENS_RESOLVER_PK,
-      });
-      // console.log('sig:', sig)
-      const sigData = concat([sig.r, sig.s, toHex(sig.v)]);
-      // console.log('sigData:', sigData)
-
-      const encodedResponse = encodeAbiParameters(
-        [
-          { name: "result", type: "bytes" },
-          { name: "expires", type: "uint64" },
-          { name: "sig", type: "bytes" },
-        ],
-        [result, BigInt(validUntil), sigData]
-      );
-
-      // console.log('encodedResponse:', encodedResponse)
-
-      // Try to verify the signature
-      // const signer = ethers.verifyMessage(messageHash, sigData)
-      // console.log('signer:', signer)
-
-      // Verify the signer
-      const recoveredAddress = await recoverAddress({
-        hash: messageHash,
-        signature: concat([sig.r, sig.s, toHex(sig.v)]),
-      });
-      console.log("Recovered signer address:", recoveredAddress);
-
-      return { data: encodedResponse };
+      return result;
     } catch (error) {
       console.error(error);
       return {
@@ -518,6 +379,7 @@ export const stealthAddressRoutes = (app, _, done) => {
       };
     }
   });
+
 
   done();
 };
