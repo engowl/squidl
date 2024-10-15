@@ -87,6 +87,7 @@ model Token {
   name     String
   symbol   String
   decimals Int
+  logo String?
 
   transactions Transaction[]
 
