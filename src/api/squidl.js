@@ -6,7 +6,6 @@ const apiWithSession = () => {
   });
   instance.interceptors.request.use(async (req) => {
     let access_token = Cookies.get("access_token");
-    console.log("access token from interceptor", access_token);
     req.headers.Authorization = `Bearer ${access_token}`;
     return req;
   });
