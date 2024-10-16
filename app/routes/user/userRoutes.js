@@ -5,6 +5,7 @@ import { sleep } from "../../utils/miscUtils.js";
 import { moralisApi } from "../../lib/moralis/api.js";
 import { toHex } from "viem";
 import { ALLOWED_CHAIN_IDS } from "../../config.js";
+import { verifyFields } from "../../utils/request.js";
 
 /**
  *
@@ -96,16 +97,16 @@ export const userRoutes = (app, _, done) => {
     "/update-user",
     { preHandler: [authMiddleware] },
     async (req, reply) => {
-      const { username } = req.body;
+      await verifyFields(req.body, ["username"], reply);
 
-      console.log({ username });
+      const { username } = req.body;
 
       const { address } = req.user;
 
       try {
         const existingUser = await prismaClient.user.findFirst({
           where: {
-            username: username,
+            username,
           },
         });
 
@@ -117,14 +118,24 @@ export const userRoutes = (app, _, done) => {
             .status(400);
         }
 
-        const updatedUser = await prismaClient.user.update({
+        const user = await prismaClient.user.findFirst({
           where: {
-            address: address,
-          },
-          data: {
-            username: username,
+            wallet: {
+              address,
+            },
           },
         });
+
+        const updatedUser = await prismaClient.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            username,
+          },
+        });
+
+        console.log({ updatedUser });
 
         return {
           message: "User alias has been updated",

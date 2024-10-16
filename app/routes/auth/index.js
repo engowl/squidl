@@ -1,5 +1,4 @@
 import { prismaClient } from "../../lib/db/prisma.js";
-import { verifyDynamicToken } from "../../lib/dynamic/auth.js";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { verifyFields } from "../../utils/request.js";
 import { getNextAliasKey } from "../stealth-address/helpers/aliasHelpers.js";
@@ -13,28 +12,35 @@ import jwt from "jsonwebtoken";
  */
 export const authRoutes = (app, _, done) => {
   app.post("/login", async (req, res) => {
-    await verifyFields(req.body, ["username", "address"], res);
+    await verifyFields(req.body, ["username", "address", "walletType"], res);
 
-    const { address, username } = req.body;
+    const { address, username, walletType } = req.body;
 
     try {
-      const existingUser = await prismaClient.user.findFirst({
+      let existingUser = await prismaClient.user.findFirst({
         where: {
-          address: address,
+          wallet: {
+            address,
+          },
         },
       });
 
-      console.log({ existingUser });
       if (!existingUser) {
         const nextAliasKey = await getNextAliasKey();
 
-        const createdUser = await prismaClient.$transaction(async (prisma) => {
+        existingUser = await prismaClient.$transaction(async (prisma) => {
           const createdUser = await prisma.user.create({
             data: {
-              address,
-              username: "",
+              wallet: {
+                create: {
+                  address,
+                  type: walletType,
+                },
+              },
+              username,
             },
           });
+
           await prisma.userAlias.create({
             data: {
               user: {
@@ -48,11 +54,13 @@ export const authRoutes = (app, _, done) => {
           });
           return createdUser;
         });
-        return createdUser;
       }
+
+      console.log({ existingUser });
 
       const token = jwt.sign(
         {
+          id: existingUser.id,
           address,
         },
         process.env.JWT_SECRET,
@@ -62,6 +70,7 @@ export const authRoutes = (app, _, done) => {
       );
 
       console.log({ token });
+
       return {
         access_token: token,
         user: existingUser,
@@ -87,17 +96,18 @@ export const authRoutes = (app, _, done) => {
       try {
         const userData = await prismaClient.user.findFirst({
           where: {
-            address: user.address,
+            wallet: {
+              address: user.address,
+            },
           },
         });
-        console.log({ userData });
         return userData;
       } catch (error) {
-        return {
-          error: "error",
+        return reply.status(500).send({
+          error: "Error while fetching user data",
           data: null,
-          message: "error",
-        };
+          message: "Error while fetching user data",
+        });
       }
     }
   );

@@ -1,12 +1,14 @@
 import { ethers } from "ethers";
 import { authMiddleware } from "../../lib/middlewares/authMiddleware.js";
 import { oneInchGetValueChart } from "./helpers/oneInchHelpers.js";
-import { dnsDecodeName, handleQuery, OffchainResolverAbi } from "../../utils/ensUtils.js";
+import {
+  dnsDecodeName,
+  handleQuery,
+  OffchainResolverAbi,
+} from "../../utils/ensUtils.js";
 import { getNextAliasKey } from "./helpers/aliasHelpers.js";
 import { prismaClient } from "../../lib/db/prisma.js";
-import {
-  stealthSignerGenerateStealthAddress,
-} from "../../lib/contracts/oasis/oasisContract.js";
+import { stealthSignerGenerateStealthAddress } from "../../lib/contracts/oasis/oasisContract.js";
 
 /**
  *
@@ -26,7 +28,9 @@ export const stealthAddressRoutes = (app, _, done) => {
         const { address } = req.user;
         const user = await prismaClient.user.findFirst({
           where: {
-            address: address,
+            wallet: {
+              address,
+            },
           },
           select: {
             id: true,
@@ -122,7 +126,9 @@ export const stealthAddressRoutes = (app, _, done) => {
 
         const user = await prismaClient.user.findFirst({
           where: {
-            address: address,
+            wallet: {
+              address,
+            },
           },
           select: {
             id: true,
@@ -289,7 +295,9 @@ export const stealthAddressRoutes = (app, _, done) => {
       const { address } = req.user;
       const user = await prismaClient.user.findFirst({
         where: {
-          address: address,
+          wallet: {
+            address,
+          },
         },
       });
 
@@ -343,7 +351,10 @@ export const stealthAddressRoutes = (app, _, done) => {
       }
 
       const iface = new ethers.Interface(OffchainResolverAbi);
-      const decodedResolveCall = iface.decodeFunctionData("resolve", dataWithoutJson);
+      const decodedResolveCall = iface.decodeFunctionData(
+        "resolve",
+        dataWithoutJson
+      );
 
       const name = dnsDecodeName(decodedResolveCall[0]);
       const alias = name.split(".")[name.split(".").length - 3];
@@ -365,8 +376,8 @@ export const stealthAddressRoutes = (app, _, done) => {
             name: name,
             description: "This is a test description",
             url: `https://${alias}.squidl.eth`,
-          }
-        }
+          },
+        },
       });
 
       return result;
@@ -379,7 +390,6 @@ export const stealthAddressRoutes = (app, _, done) => {
       };
     }
   });
-
 
   done();
 };
