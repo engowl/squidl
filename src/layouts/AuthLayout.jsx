@@ -16,7 +16,7 @@ export default function AuthLayout() {
 
   if (!isSignedIn) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center px-5 md:px-10">
+      <div className="flex min-h-screen w-full items-center justify-center px-5 md:px-10 bg-primary-50">
         <div className="w-full max-w-md">
           <DynamicEmbeddedWidget background="with-border" />
         </div>

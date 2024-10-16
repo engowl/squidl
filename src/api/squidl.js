@@ -1,16 +1,16 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-
 const apiWithSession = () => {
   const instance = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL,
   });
   instance.interceptors.request.use(async (req) => {
-    const sessionToken = Cookies.get("access_token");
-    console.log({ sessionToken });
-    req.headers.Authorization = `Bearer ${sessionToken}`;
+    let access_token = Cookies.get("access_token");
+    console.log("access token from interceptor", access_token);
+    req.headers.Authorization = `Bearer ${access_token}`;
     return req;
   });
+
   return instance;
 };
 

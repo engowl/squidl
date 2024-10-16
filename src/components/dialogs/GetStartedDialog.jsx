@@ -1,11 +1,7 @@
 import {
   Modal,
   ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Button,
-  useDisclosure,
   Input,
   Skeleton,
 } from "@nextui-org/react";
@@ -66,6 +62,8 @@ function StepOne({ setStep }) {
   const { contract } = useWeb3();
 
   async function handleUpdate() {
+    if (loading) return;
+
     if (!username) {
       return toast.error("Please provide a username");
     }
@@ -75,22 +73,33 @@ function StepOne({ setStep }) {
     let id;
 
     try {
-      const res = await squidlAPI.post("/user/update-user", {
-        username: username,
-      });
-      console.log({ res });
       id = toast.loading(
-        "Your username has been created!, creating meta address"
+        "Creating meta address, please sign the transaction..."
       );
+
       const authSigner = localStorage.getItem("auth_signer");
       const tx = await contract.register(JSON.parse(authSigner));
 
+      toast.loading(
+        "Cooking your meta address and ENS username, please wait...",
+        {
+          id,
+        }
+      );
+
       const hash = await tx.wait();
+
       console.log({ hash, tx });
 
-      toast.success("Meta address and username has been created");
+      const res = await squidlAPI.post("/user/update-user", {
+        username: username.toLowerCase(),
+      });
+
+      toast.success("Meta address and ENS username successfully created");
+
       setStep("two");
     } catch (e) {
+      console.error(e);
       toast.error("Error creating your username");
     } finally {
       toast.dismiss(id);
