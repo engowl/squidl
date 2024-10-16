@@ -15,7 +15,7 @@ import useSWR from "swr";
 
 export default function AuthProvider({ children }) {
   const { isLoaded, provider, signer } = useWeb3();
-  const { handleLogOut, user } = useDynamicContext();
+  const { handleLogOut, user, primaryWallet } = useDynamicContext();
   const [isReadyToSign, setIsReadyToSign] = useState(false);
   const [isSigningIn, setSigningIn] = useState(false);
   const [, setOpen] = useAtom(isGetStartedDialogAtom);
@@ -30,21 +30,14 @@ export default function AuthProvider({ children }) {
     }
   );
 
+  console.log({ primaryWallet, user });
+
   const login = async (user) => {
-    if (isSigningIn || !user) return;
+    if (isSigningIn || !user || !primaryWallet) return;
 
     setSigningIn(true);
 
     try {
-      toast.loading("Verifying data, please wait...", {
-        id: "signing",
-      });
-
-      const { data } = await squidlPublicAPI.post("/auth/login", {
-        address: user.verifiedCredentials[0].address,
-        username: "",
-      });
-
       toast.loading("Please sign the request to continue", {
         id: "signing",
       });
@@ -54,6 +47,16 @@ export default function AuthProvider({ children }) {
       const chainId = network.chainId;
 
       const auth = await signAuthToken(signer, CONTRACT_ADDRESS, chainId);
+
+      toast.loading("Verifying data, please wait...", {
+        id: "signing",
+      });
+
+      const { data } = await squidlPublicAPI.post("/auth/login", {
+        address: primaryWallet.address,
+        username: "",
+        walletType: primaryWallet.key !== "turnkeyhd" ? "EOA" : "SOCIAL",
+      });
 
       localStorage.setItem("auth_signer", JSON.stringify(auth));
       Cookies.set("access_token", data.access_token, {

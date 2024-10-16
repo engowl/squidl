@@ -74,7 +74,7 @@ function StepOne({ setStep }) {
 
     try {
       id = toast.loading(
-        "Creating meta address, please sign the transaction..."
+        "Preparing meta address, please sign the transaction..."
       );
 
       const authSigner = localStorage.getItem("auth_signer");
@@ -91,7 +91,7 @@ function StepOne({ setStep }) {
 
       console.log({ hash, tx });
 
-      const res = await squidlAPI.post("/user/update-user", {
+      await squidlAPI.post("/user/update-user", {
         username: username.toLowerCase(),
       });
 
